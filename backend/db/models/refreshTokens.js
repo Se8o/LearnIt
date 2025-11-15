@@ -1,11 +1,12 @@
 const { getDb } = require('../setup');
 const crypto = require('crypto');
 const { config } = require('../../config/env');
-const { TOKENS } = require('../../config/constants');
 const { mapDbRow } = require('../../utils/db-helpers');
 
 /**
  * Vytvoření refresh tokenu pro uživatele
+ * @param {number} userId - User ID
+ * @returns {string} Generated refresh token
  */
 const createRefreshToken = (userId) => {
   const db = getDb();
@@ -15,9 +16,7 @@ const createRefreshToken = (userId) => {
   
   // Vypočítat expiraci
   const expiresAt = new Date();
-  const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '7d';
-  const expiryDays = parseInt(refreshTokenExpiry.replace('d', '')) || TOKENS.REFRESH_TOKEN_DEFAULT_EXPIRY_DAYS;
-  expiresAt.setDate(expiresAt.getDate() + expiryDays);
+  expiresAt.setDate(expiresAt.getDate() + config.jwt.refreshTokenExpiryDays);
   
   // Uložit do databáze
   const stmt = db.prepare(`

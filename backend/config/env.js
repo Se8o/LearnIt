@@ -73,6 +73,33 @@ const getConfigWarnings = () => {
 };
 
 /**
+ * Parse time string (e.g., '15m', '7d', '2h') to days
+ * @param {string} timeStr - Time string with unit (m/h/d)
+ * @param {number} defaultDays - Default value if parsing fails
+ * @returns {number} Number of days
+ */
+const parseTimeToDays = (timeStr, defaultDays = 7) => {
+  if (!timeStr) return defaultDays;
+  
+  const match = timeStr.match(/^(\d+)([mhd])$/);
+  if (!match) return defaultDays;
+  
+  const [, value, unit] = match;
+  const numValue = parseInt(value, 10);
+  
+  switch (unit) {
+    case 'm': // minutes to days
+      return numValue / (60 * 24);
+    case 'h': // hours to days
+      return numValue / 24;
+    case 'd': // days
+      return numValue;
+    default:
+      return defaultDays;
+  }
+};
+
+/**
  * Export konfigurační objekt
  */
 const config = {
@@ -83,7 +110,9 @@ const config = {
     secret: process.env.JWT_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
     accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY || '15m',
-    refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || '7d'
+    refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || '7d',
+    // Parsed values
+    refreshTokenExpiryDays: parseTimeToDays(process.env.REFRESH_TOKEN_EXPIRY, 7)
   },
   
   cors: {
