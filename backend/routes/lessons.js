@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { getAllLessons, getLessonByTopicId } = require('../db/models/lessons');
 const { getTopicById } = require('../db/models/topics');
-const { successResponse } = require('../utils/response-helpers');
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
 
 /**

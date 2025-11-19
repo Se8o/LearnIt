@@ -1,38 +1,7 @@
 /**
- * Response helper utilities
- * Standardizes API responses across all routes
+ * Quiz utility functions
+ * Helper functions for quiz scoring and feedback
  */
-
-/**
- * Sends success response with data
- * @param {Object} res - Express response object
- * @param {*} data - Response data
- * @param {number} statusCode - HTTP status code (default: 200)
- * @param {Object} meta - Additional metadata (count, pagination, etc.)
- */
-const successResponse = (res, data, statusCode = 200, meta = {}) => {
-  const response = {
-    success: true,
-    ...meta,
-    data
-  };
-  
-  res.status(statusCode).json(response);
-};
-
-/**
- * Sends success response for created resource
- * @param {Object} res - Express response object
- * @param {*} data - Created resource data
- * @param {string} message - Success message
- */
-const createdResponse = (res, data, message = 'Vytvořeno úspěšně') => {
-  res.status(201).json({
-    success: true,
-    message,
-    data
-  });
-};
 
 /**
  * Calculates quiz feedback based on score percentage
@@ -81,8 +50,6 @@ const calculateQuizScore = (results) => {
 };
 
 module.exports = {
-  successResponse,
-  createdResponse,
   getQuizFeedback,
   calculateQuizScore
 };

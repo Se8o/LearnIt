@@ -223,11 +223,14 @@ router.post('/submit', quizLimiter, validateQuizSubmit, asyncHandler((req, res) 
   const score = calculateQuizScore(results);
   const { feedback, level } = getQuizFeedback(score.percentage);
   
-  successResponse(res, {
-    results,
-    score,
-    feedback,
-    level
+  res.json({
+    success: true,
+    data: {
+      results,
+      score,
+      feedback,
+      level
+    }
   });
 }));
 
