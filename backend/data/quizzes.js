@@ -1,4 +1,3 @@
-// Mock data pro kvízy
 const quizzes = [
   {
     id: 1,

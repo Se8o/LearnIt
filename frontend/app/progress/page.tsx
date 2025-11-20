@@ -51,16 +51,16 @@ export default function ProgressPage() {
     const badges: Record<string, { name: string; icon: string; description: string }> = {
       'perfect-score': {
         name: 'Perfektní skóre',
-        icon: '🌟',
+        icon: '',
         description: '100% úspěšnost v kvízu',
       },
       'beginner': {
         name: 'Začátečník',
-        icon: '📚',
+        icon: '',
         description: '3 dokončené lekce',
       },
     };
-    return badges[badge] || { name: badge, icon: '🏆', description: '' };
+    return badges[badge] || { name: badge, icon: '', description: '' };
   };
 
   if (loading) {
@@ -88,31 +88,27 @@ export default function ProgressPage() {
   return (
     <div className="container mx-auto px-4 py-16 max-w-6xl">
       <h1 className="text-5xl font-bold mb-8 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        Váš pokrok 📊
+        Váš pokrok
       </h1>
 
       {/* Stats Overview */}
       <div className="grid md:grid-cols-4 gap-6 mb-12">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
-          <div className="text-4xl mb-2">🌟</div>
           <div className="text-3xl font-bold mb-1">{progress.totalPoints}</div>
           <div className="text-sm opacity-90">Celkové body</div>
         </div>
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
-          <div className="text-4xl mb-2">📊</div>
           <div className="text-3xl font-bold mb-1">Level {progress.level}</div>
           <div className="text-sm opacity-90">Vaše úroveň</div>
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
-          <div className="text-4xl mb-2">📚</div>
           <div className="text-3xl font-bold mb-1">{progress.completedLessons.length}</div>
           <div className="text-sm opacity-90">Dokončené lekce</div>
         </div>
 
         <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-6 shadow-lg">
-          <div className="text-4xl mb-2">🏆</div>
           <div className="text-3xl font-bold mb-1">{progress.badges.length}</div>
           <div className="text-sm opacity-90">Odznaky</div>
         </div>
@@ -140,7 +136,7 @@ export default function ProgressPage() {
       {/* Badges */}
       {progress.badges.length > 0 && (
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold mb-6">Vaše odznaky 🏆</h2>
+          <h2 className="text-2xl font-bold mb-6">Vaše odznaky</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {progress.badges.map((badge, index) => {
               const badgeInfo = getBadgeInfo(badge);
@@ -171,7 +167,6 @@ export default function ProgressPage() {
                   key={index}
                   className="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg"
                 >
-                  <div className="text-3xl">{topic?.icon || '📖'}</div>
                   <div className="flex-1">
                     <h3 className="font-semibold">{topic?.title || 'Lekce'}</h3>
                     <p className="text-sm text-gray-600">
@@ -198,7 +193,6 @@ export default function ProgressPage() {
                   key={index}
                   className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg"
                 >
-                  <div className="text-3xl">{topic?.icon || '📝'}</div>
                   <div className="flex-1">
                     <h3 className="font-semibold">{topic?.title || 'Kvíz'}</h3>
                     <p className="text-sm text-gray-600">
@@ -221,7 +215,6 @@ export default function ProgressPage() {
       {/* Empty State */}
       {progress.completedLessons.length === 0 && progress.quizResults.length === 0 && (
         <div className="bg-gray-50 rounded-xl p-12 text-center">
-          <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-2xl font-bold mb-2">Začněte své učení!</h3>
           <p className="text-gray-600 mb-6">
             Ještě jste nedokončili žádnou lekci. Pojďte začít!

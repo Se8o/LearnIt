@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// Mock data pro uživatelský pokrok (v production bude v DB)
 let userProgress = {
   completedLessons: [],
   quizResults: [],
@@ -155,7 +154,6 @@ router.post('/complete-lesson', (req, res) => {
       });
     }
     
-    // Zkontrolovat, zda lekce už není označená jako dokončená
     const alreadyCompleted = userProgress.completedLessons.find(
       l => l.topicId === topicId && l.lessonId === lessonId
     );
@@ -167,7 +165,6 @@ router.post('/complete-lesson', (req, res) => {
         completedAt: new Date().toISOString()
       });
       
-      // Přidat body za dokončení lekce
       userProgress.totalPoints += 10;
     }
     
@@ -227,7 +224,6 @@ router.post('/save-quiz-result', (req, res) => {
       });
     }
     
-    // Uložit výsledek kvízu
     userProgress.quizResults.push({
       topicId,
       score,
@@ -235,14 +231,11 @@ router.post('/save-quiz-result', (req, res) => {
       completedAt: new Date().toISOString()
     });
     
-    // Přidat body podle výsledku
     const points = Math.round(percentage / 10);
     userProgress.totalPoints += points;
     
-    // Kontrola úrovně (každých 100 bodů = nová úroveň)
     userProgress.level = Math.floor(userProgress.totalPoints / 100) + 1;
     
-    // Přidat odznaky
     if (percentage === 100 && !userProgress.badges.includes('perfect-score')) {
       userProgress.badges.push('perfect-score');
     }

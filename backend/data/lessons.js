@@ -1,4 +1,3 @@
-// Mock data pro lekce
 const lessons = [
   {
     id: 1,

@@ -79,7 +79,6 @@ router.get('/:topicId', (req, res) => {
   try {
     const topicId = parseInt(req.params.topicId);
     
-    // Zkontrolovat, zda téma existuje
     const topic = topics.find(t => t.id === topicId);
     if (!topic) {
       return res.status(404).json({
@@ -88,7 +87,6 @@ router.get('/:topicId', (req, res) => {
       });
     }
     
-    // Najít lekci pro toto téma
     const lesson = lessons.find(l => l.topicId === topicId);
     
     if (!lesson) {
@@ -141,7 +139,6 @@ router.get('/:topicId', (req, res) => {
  */
 router.get('/', (req, res) => {
   try {
-    // Přidat informace o tématu ke každé lekci
     const lessonsWithTopics = lessons.map(lesson => {
       const topic = topics.find(t => t.id === lesson.topicId);
       return {

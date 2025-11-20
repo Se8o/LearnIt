@@ -1,4 +1,3 @@
-// Mock data pro témata
 const topics = [
   {
     id: 1,
@@ -7,7 +6,7 @@ const topics = [
     description: 'Základy klasické mechaniky a pohybu těles',
     difficulty: 'beginner',
     duration: 5,
-    icon: '⚛️',
+    icon: '',
     color: '#3B82F6'
   },
   {
@@ -17,7 +16,7 @@ const topics = [
     description: 'Struktura a funkce živých buněk',
     difficulty: 'beginner',
     duration: 4,
-    icon: '🧬',
+    icon: '',
     color: '#10B981'
   },
   {
@@ -27,7 +26,7 @@ const topics = [
     description: 'Co nás pohání k činnostem a jak funguje motivace',
     difficulty: 'beginner',
     duration: 5,
-    icon: '🧠',
+    icon: '',
     color: '#8B5CF6'
   }
 ];

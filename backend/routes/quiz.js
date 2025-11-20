@@ -95,7 +95,6 @@ router.get('/:topicId', (req, res) => {
   try {
     const topicId = parseInt(req.params.topicId);
     
-    // Zkontrolovat, zda téma existuje
     const topic = topics.find(t => t.id === topicId);
     if (!topic) {
       return res.status(404).json({
@@ -104,7 +103,6 @@ router.get('/:topicId', (req, res) => {
       });
     }
     
-    // Najít kvíz pro toto téma
     const quiz = quizzes.find(q => q.topicId === topicId);
     
     if (!quiz) {
@@ -114,14 +112,12 @@ router.get('/:topicId', (req, res) => {
       });
     }
     
-    // Odstranit správné odpovědi z otázek (poslat pouze pro kontrolu)
     const quizForUser = {
       ...quiz,
       questions: quiz.questions.map(q => ({
         id: q.id,
         question: q.question,
         options: q.options
-        // correctAnswer a explanation nejsou zahrnuty
       }))
     };
     
@@ -233,7 +229,6 @@ router.post('/submit', (req, res) => {
       });
     }
     
-    // Vyhodnotit odpovědi
     const results = quiz.questions.map((question, index) => {
       const userAnswer = answers[index];
       const isCorrect = userAnswer === question.correctAnswer;
@@ -252,21 +247,20 @@ router.post('/submit', (req, res) => {
     const totalQuestions = quiz.questions.length;
     const percentage = Math.round((correctCount / totalQuestions) * 100);
     
-    // Určit úroveň úspěchu
     let feedback = '';
     let level = '';
     
     if (percentage >= 90) {
-      feedback = 'Výborně! Máš tématu opravdu rozumíš! 🌟';
+      feedback = 'Výborně! Máš tématu opravdu rozumíš!';
       level = 'excellent';
     } else if (percentage >= 70) {
-      feedback = 'Dobrá práce! Pár věcí bys mohl/a ještě zopakovat. 👍';
+      feedback = 'Dobrá práce! Pár věcí bys mohl/a ještě zopakovat.';
       level = 'good';
     } else if (percentage >= 50) {
-      feedback = 'Není to špatné, ale doporučuji si lekci zopakovat. 📚';
+      feedback = 'Není to špatné, ale doporučuji si lekci zopakovat.';
       level = 'average';
     } else {
-      feedback = 'Zkus si lekci projít znovu a pak to zkus ještě jednou. 💪';
+      feedback = 'Zkus si lekci projít znovu a pak to zkus ještě jednou.';
       level = 'needs-improvement';
     }
     
