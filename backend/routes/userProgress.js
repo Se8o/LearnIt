@@ -1,13 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
-let userProgress = {
-  completedLessons: [],
-  quizResults: [],
-  totalPoints: 0,
-  level: 1,
-  badges: []
-};
+const { getUserProgress, completeLesson, saveQuizResult, resetProgress } = require('../db/models/userProgress');
 
 /**
  * @swagger
@@ -101,9 +94,10 @@ let userProgress = {
  */
 router.get('/', (req, res) => {
   try {
+    const progress = getUserProgress();
     res.json({
       success: true,
-      data: userProgress
+      data: progress
     });
   } catch (error) {
     res.status(500).json({
@@ -154,23 +148,11 @@ router.post('/complete-lesson', (req, res) => {
       });
     }
     
-    const alreadyCompleted = userProgress.completedLessons.find(
-      l => l.topicId === topicId && l.lessonId === lessonId
-    );
-    
-    if (!alreadyCompleted) {
-      userProgress.completedLessons.push({
-        topicId,
-        lessonId,
-        completedAt: new Date().toISOString()
-      });
-      
-      userProgress.totalPoints += 10;
-    }
+    const progress = completeLesson('default', topicId, lessonId);
     
     res.json({
       success: true,
-      data: userProgress
+      data: progress
     });
   } catch (error) {
     res.status(500).json({
@@ -224,29 +206,12 @@ router.post('/save-quiz-result', (req, res) => {
       });
     }
     
-    userProgress.quizResults.push({
-      topicId,
-      score,
-      percentage,
-      completedAt: new Date().toISOString()
-    });
-    
-    const points = Math.round(percentage / 10);
-    userProgress.totalPoints += points;
-    
-    userProgress.level = Math.floor(userProgress.totalPoints / 100) + 1;
-    
-    if (percentage === 100 && !userProgress.badges.includes('perfect-score')) {
-      userProgress.badges.push('perfect-score');
-    }
-    if (userProgress.completedLessons.length >= 3 && !userProgress.badges.includes('beginner')) {
-      userProgress.badges.push('beginner');
-    }
+    const result = saveQuizResult('default', topicId, score, percentage);
     
     res.json({
       success: true,
-      data: userProgress,
-      pointsEarned: points
+      data: result.progress,
+      pointsEarned: result.pointsEarned
     });
   } catch (error) {
     res.status(500).json({
@@ -283,18 +248,12 @@ router.post('/save-quiz-result', (req, res) => {
  */
 router.post('/reset', (req, res) => {
   try {
-    userProgress = {
-      completedLessons: [],
-      quizResults: [],
-      totalPoints: 0,
-      level: 1,
-      badges: []
-    };
+    const progress = resetProgress('default');
     
     res.json({
       success: true,
       message: 'Pokrok byl resetován',
-      data: userProgress
+      data: progress
     });
   } catch (error) {
     res.status(500).json({

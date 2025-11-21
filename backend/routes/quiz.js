@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const quizzes = require('../data/quizzes');
-const topics = require('../data/topics');
+const { getQuizByTopicId } = require('../db/models/quizzes');
+const { getTopicById } = require('../db/models/topics');
 
 /**
  * @swagger
@@ -95,7 +95,7 @@ router.get('/:topicId', (req, res) => {
   try {
     const topicId = parseInt(req.params.topicId);
     
-    const topic = topics.find(t => t.id === topicId);
+    const topic = getTopicById(topicId);
     if (!topic) {
       return res.status(404).json({
         success: false,
@@ -103,7 +103,7 @@ router.get('/:topicId', (req, res) => {
       });
     }
     
-    const quiz = quizzes.find(q => q.topicId === topicId);
+    const quiz = getQuizByTopicId(topicId);
     
     if (!quiz) {
       return res.status(404).json({
@@ -123,10 +123,7 @@ router.get('/:topicId', (req, res) => {
     
     res.json({
       success: true,
-      data: {
-        ...quizForUser,
-        topic: topic
-      }
+      data: quizForUser
     });
   } catch (error) {
     res.status(500).json({
@@ -220,7 +217,7 @@ router.post('/submit', (req, res) => {
       });
     }
     
-    const quiz = quizzes.find(q => q.topicId === parseInt(topicId));
+    const quiz = getQuizByTopicId(parseInt(topicId));
     
     if (!quiz) {
       return res.status(404).json({

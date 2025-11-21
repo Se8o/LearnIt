@@ -3,8 +3,11 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
+const { seedDatabase } = require('./db/seed');
 
 dotenv.config();
+
+seedDatabase();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

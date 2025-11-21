@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const topics = require('../data/topics');
+const { getAllTopics, getTopicById, getTopicsByCategory } = require('../db/models/topics');
 
 /**
  * @swagger
@@ -67,6 +67,7 @@ const topics = require('../data/topics');
  */
 router.get('/', (req, res) => {
   try {
+    const topics = getAllTopics();
     res.json({
       success: true,
       count: topics.length,
@@ -116,7 +117,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   try {
     const topicId = parseInt(req.params.id);
-    const topic = topics.find(t => t.id === topicId);
+    const topic = getTopicById(topicId);
     
     if (!topic) {
       return res.status(404).json({
@@ -174,9 +175,7 @@ router.get('/:id', (req, res) => {
 router.get('/category/:category', (req, res) => {
   try {
     const category = req.params.category;
-    const filteredTopics = topics.filter(t => 
-      t.category.toLowerCase() === category.toLowerCase()
-    );
+    const filteredTopics = getTopicsByCategory(category);
     
     res.json({
       success: true,

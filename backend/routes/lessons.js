@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const lessons = require('../data/lessons');
-const topics = require('../data/topics');
+const { getAllLessons, getLessonByTopicId } = require('../db/models/lessons');
+const { getTopicById } = require('../db/models/topics');
 
 /**
  * @swagger
@@ -79,7 +79,7 @@ router.get('/:topicId', (req, res) => {
   try {
     const topicId = parseInt(req.params.topicId);
     
-    const topic = topics.find(t => t.id === topicId);
+    const topic = getTopicById(topicId);
     if (!topic) {
       return res.status(404).json({
         success: false,
@@ -87,7 +87,7 @@ router.get('/:topicId', (req, res) => {
       });
     }
     
-    const lesson = lessons.find(l => l.topicId === topicId);
+    const lesson = getLessonByTopicId(topicId);
     
     if (!lesson) {
       return res.status(404).json({
@@ -98,10 +98,7 @@ router.get('/:topicId', (req, res) => {
     
     res.json({
       success: true,
-      data: {
-        ...lesson,
-        topic: topic
-      }
+      data: lesson
     });
   } catch (error) {
     res.status(500).json({
@@ -139,13 +136,7 @@ router.get('/:topicId', (req, res) => {
  */
 router.get('/', (req, res) => {
   try {
-    const lessonsWithTopics = lessons.map(lesson => {
-      const topic = topics.find(t => t.id === lesson.topicId);
-      return {
-        ...lesson,
-        topic: topic
-      };
-    });
+    const lessonsWithTopics = getAllLessons();
     
     res.json({
       success: true,
