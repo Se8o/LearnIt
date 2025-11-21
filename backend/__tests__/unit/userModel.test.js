@@ -28,10 +28,13 @@ describe('User Model', () => {
       expect(user.id).toBeDefined();
       expect(user.email).toBe(userData.email);
       expect(user.name).toBe(userData.name);
-      expect(user.password).not.toBe(userData.password); // Should be hashed
+      expect(user.createdAt).toBeDefined();
       
-      // Verify password is hashed
-      const isMatch = await bcrypt.compare(userData.password, user.password);
+      // Verify password is hashed in database
+      const dbUser = getUserByEmail(userData.email);
+      expect(dbUser.passwordHash).toBeDefined();
+      expect(dbUser.passwordHash).not.toBe(userData.password);
+      const isMatch = await bcrypt.compare(userData.password, dbUser.passwordHash);
       expect(isMatch).toBe(true);
     });
 
@@ -94,17 +97,19 @@ describe('User Model', () => {
   describe('verifyPassword', () => {
     test('should verify correct password', async () => {
       const password = 'password123';
-      const user = await createUser('test@example.com', password, 'Test User');
+      await createUser('test@example.com', password, 'Test User');
+      const user = getUserByEmail('test@example.com');
 
-      const isValid = await validatePassword(password, user.password);
+      const isValid = await validatePassword(password, user.passwordHash);
 
       expect(isValid).toBe(true);
     });
 
     test('should reject incorrect password', async () => {
-      const user = await createUser('test@example.com', 'password123', 'Test User');
+      await createUser('test@example.com', 'password123', 'Test User');
+      const user = getUserByEmail('test@example.com');
 
-      const isValid = await validatePassword('wrongpassword', user.password);
+      const isValid = await validatePassword('wrongpassword', user.passwordHash);
 
       expect(isValid).toBe(false);
     });

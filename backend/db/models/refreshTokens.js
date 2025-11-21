@@ -13,7 +13,8 @@ const createRefreshToken = (userId) => {
   
   // Vypočítat expiraci
   const expiresAt = new Date();
-  const expiryDays = parseInt(config.jwt.refreshTokenExpiry.replace('d', '')) || 7;
+  const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '7d';
+  const expiryDays = parseInt(refreshTokenExpiry.replace('d', '')) || 7;
   expiresAt.setDate(expiresAt.getDate() + expiryDays);
   
   // Uložit do databáze
@@ -24,10 +25,7 @@ const createRefreshToken = (userId) => {
   
   stmt.run(userId, token, expiresAt.toISOString());
   
-  return {
-    token,
-    expiresAt: expiresAt.toISOString()
-  };
+  return token;
 };
 
 /**
@@ -48,14 +46,14 @@ const verifyRefreshToken = (token) => {
   const refreshToken = findRefreshToken(token);
   
   if (!refreshToken) {
-    return { valid: false, error: 'Token nenalezen' };
+    return { valid: false, userId: null };
   }
   
   const now = new Date();
   const expiresAt = new Date(refreshToken.expires_at);
   
   if (now > expiresAt) {
-    return { valid: false, error: 'Token expiroval' };
+    return { valid: false, userId: null };
   }
   
   return { 

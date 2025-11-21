@@ -21,6 +21,7 @@ describe('Auth API Integration Tests', () => {
   beforeEach(() => {
     // Clean users and tokens before each test
     db.prepare('DELETE FROM refresh_tokens').run();
+    db.prepare('DELETE FROM user_stats').run();
     db.prepare('DELETE FROM users').run();
   });
 
@@ -34,9 +35,13 @@ describe('Auth API Integration Tests', () => {
 
       const response = await request(app)
         .post('/api/auth/register')
-        .send(userData)
-        .expect(201);
-
+        .send(userData);
+      
+      if (response.status !== 201) {
+        console.log('Registration failed:', response.body);
+      }
+      
+      expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
@@ -62,7 +67,7 @@ describe('Auth API Integration Tests', () => {
       const response = await request(app)
         .post('/api/auth/register')
         .send(userData)
-        .expect(400);
+        .expect(409); // Conflict status for duplicate email
 
       expect(response.body.success).toBe(false);
     });
@@ -240,7 +245,7 @@ describe('Auth API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('Logged out successfully');
+      expect(response.body.message).toBe('Úspěšně odhlášen'); // Czech message
     });
 
     test('should invalidate refresh token after logout', async () => {

@@ -3,9 +3,13 @@ const bcrypt = require('bcryptjs');
 const { AppError } = require('../../middleware/errorHandler');
 
 const createUser = async (email, password, name) => {
+  if (!email || !password || !name) {
+    throw new AppError('Email, heslo a jméno jsou povinné', 400);
+  }
+  
   const db = getDb();
   
-  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  const existingUser = db.prepare('SELECT id FROM users WHERE LOWER(email) = LOWER(?)').get(email);
   if (existingUser) {
     throw new AppError('Tento email je již zaregistrován', 409);
   }
@@ -39,7 +43,7 @@ const getUserByEmail = (email) => {
   return db.prepare(`
     SELECT id, email, password_hash as passwordHash, name, created_at as createdAt
     FROM users 
-    WHERE email = ?
+    WHERE LOWER(email) = LOWER(?)
   `).get(email);
 };
 
@@ -57,8 +61,17 @@ const validatePassword = async (password, hash) => {
 };
 
 const updateUser = (id, updates) => {
+  if (!updates.name || updates.name.trim() === '') {
+    throw new AppError('Jméno je povinné', 400);
+  }
+  
   const db = getDb();
   const { name } = updates;
+  
+  const user = getUserById(id);
+  if (!user) {
+    throw new AppError('Uživatel nenalezen', 404);
+  }
   
   const stmt = db.prepare(`
     UPDATE users 

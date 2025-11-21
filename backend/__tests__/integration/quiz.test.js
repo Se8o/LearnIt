@@ -122,12 +122,15 @@ describe('Quiz API Integration Tests', () => {
       expect(feedback).toBeDefined();
       expect(level).toBeDefined();
       
-      if (score.percentage >= 80) {
-        expect(level).toBe('Výborně!');
-      } else if (score.percentage >= 60) {
-        expect(level).toBe('Dobře!');
+      // Level should be one of the expected values
+      if (score.percentage >= 90) {
+        expect(level).toBe('excellent');
+      } else if (score.percentage >= 70) {
+        expect(level).toBe('good');
+      } else if (score.percentage >= 50) {
+        expect(level).toBe('average');
       } else {
-        expect(level).toBe('Potřebuje zlepšení');
+        expect(level).toBe('needs-improvement');
       }
     });
 

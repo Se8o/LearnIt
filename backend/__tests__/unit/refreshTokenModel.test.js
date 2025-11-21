@@ -14,6 +14,7 @@ describe('RefreshToken Model', () => {
   beforeEach(async () => {
     // Clean tables before each test
     db.prepare('DELETE FROM refresh_tokens').run();
+    db.prepare('DELETE FROM user_stats').run();
     db.prepare('DELETE FROM users').run();
     
     // Create test user
@@ -93,7 +94,7 @@ describe('RefreshToken Model', () => {
       
       // Manually expire the token
       db.prepare(
-        'UPDATE refresh_tokens SET expires_at = datetime("now", "-1 day") WHERE token = ?'
+        "UPDATE refresh_tokens SET expires_at = datetime('now', '-1 day') WHERE token = ?"
       ).run(token);
 
       const result = RefreshToken.verifyRefreshToken(token);
@@ -108,8 +109,9 @@ describe('RefreshToken Model', () => {
 
       RefreshToken.revokeRefreshToken(token);
 
-      const found = RefreshToken.findRefreshToken(token);
-      expect(found.revoked).toBe(1);
+      // Token should now be invalid
+      const result = RefreshToken.verifyRefreshToken(token);
+      expect(result.valid).toBe(false);
     });
 
     test('should not throw for non-existent token', () => {

@@ -69,9 +69,11 @@ const errorHandler = (err, req, res, next) => {
     statusCode: error.statusCode
   };
 
-  // Přidat detaily jen v development mode
-  if (process.env.NODE_ENV === 'development') {
-    response.stack = err.stack;
+  // Přidat detaily v development nebo test mode
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    if (err.stack) {
+      response.stack = err.stack;
+    }
     if (error.errors) {
       response.errors = error.errors;
     }

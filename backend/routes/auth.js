@@ -118,7 +118,7 @@ router.post('/register', registerLimiter, validateRegister, asyncHandler(async (
     success: true,
     message: 'Uživatel úspěšně vytvořen',
     accessToken,
-    refreshToken: refreshToken.token,
+    refreshToken,
     user: {
       id: user.id,
       email: user.email,
@@ -193,7 +193,7 @@ router.post('/login', authLimiter, validateLogin, asyncHandler(async (req, res) 
     success: true,
     message: 'Úspěšně přihlášen',
     accessToken,
-    refreshToken: refreshToken.token,
+    refreshToken,
     user: {
       id: user.id,
       email: user.email,

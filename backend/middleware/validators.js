@@ -145,7 +145,7 @@ const validateTopicId = [
  * Validace pro submit kvízu
  */
 const validateQuizSubmit = [
-  param('topicId')
+  body('topicId') // topicId is in request body, not URL params
     .isInt({ min: 1 })
     .withMessage('Neplatné ID tématu'),
   

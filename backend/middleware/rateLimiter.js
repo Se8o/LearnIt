@@ -1,6 +1,9 @@
 const rateLimit = require('express-rate-limit');
 const { AppError } = require('./errorHandler');
 
+// Skip rate limiting in test environment
+const skipRateLimiting = process.env.NODE_ENV === 'test';
+
 /**
  * Obecný rate limiter - pro většinu endpointů
  */
@@ -10,6 +13,7 @@ const generalLimiter = rateLimit({
   message: 'Příliš mnoho požadavků z této IP adresy, zkuste to prosím později',
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  skip: () => skipRateLimiting,
   handler: (req, res) => {
     throw new AppError(
       'Příliš mnoho požadavků. Zkuste to prosím za chvíli.',
@@ -26,6 +30,7 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minut
   max: 5, // limit 5 pokusů o přihlášení
   skipSuccessfulRequests: true, // Nepočítat úspěšné pokusy
+  skip: () => skipRateLimiting,
   message: 'Příliš mnoho pokusů o přihlášení, zkuste to za 15 minut',
   handler: (req, res) => {
     throw new AppError(
@@ -42,6 +47,7 @@ const authLimiter = rateLimit({
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hodina
   max: 3, // max 3 registrace za hodinu z jedné IP
+  skip: () => skipRateLimiting,
   message: 'Příliš mnoho registrací z této IP adresy',
   handler: (req, res) => {
     throw new AppError(
@@ -58,6 +64,7 @@ const registerLimiter = rateLimit({
 const quizLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minuta
   max: 10, // max 10 submitů za minutu
+  skip: () => skipRateLimiting,
   message: 'Příliš mnoho odeslaných kvízů',
   handler: (req, res) => {
     throw new AppError(
@@ -73,6 +80,7 @@ const quizLimiter = rateLimit({
 const strictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minut
   max: 3, // max 3 pokusy
+  skip: () => skipRateLimiting,
   message: 'Příliš mnoho pokusů, zkuste to později',
   handler: (req, res) => {
     throw new AppError(
