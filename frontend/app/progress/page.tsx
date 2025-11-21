@@ -3,18 +3,20 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { userProgressApi, topicsApi, UserProgress, Topic } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProgressPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [progressResponse, topicsResponse] = await Promise.all([
-          userProgressApi.get(),
+          userProgressApi.get(token || undefined),
           topicsApi.getAll(),
         ]);
         setProgress(progressResponse.data);
@@ -28,13 +30,13 @@ export default function ProgressPage() {
     };
 
     fetchData();
-  }, []);
+  }, [token]);
 
   const handleReset = async () => {
     if (!confirm('Opravdu chcete resetovat veškerý pokrok?')) return;
     
     try {
-      const response = await userProgressApi.reset();
+      const response = await userProgressApi.reset(token || undefined);
       setProgress(response.data);
     } catch (err) {
       console.error('Chyba při resetování:', err);

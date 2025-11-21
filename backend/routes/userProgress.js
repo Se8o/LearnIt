@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getUserProgress, completeLesson, saveQuizResult, resetProgress } = require('../db/models/userProgress');
+const { optionalAuth, authenticateToken } = require('../middleware/auth');
 
 /**
  * @swagger
@@ -92,9 +93,24 @@ const { getUserProgress, completeLesson, saveQuizResult, resetProgress } = requi
  *       500:
  *         description: Chyba serveru
  */
-router.get('/', (req, res) => {
+router.get('/', optionalAuth, (req, res) => {
   try {
-    const progress = getUserProgress();
+    // Pro nepřihlášené uživatele vrátit prázdný progress
+    if (!req.user) {
+      return res.json({
+        success: true,
+        data: {
+          completedLessons: [],
+          quizResults: [],
+          totalPoints: 0,
+          level: 1,
+          badges: []
+        }
+      });
+    }
+    
+    const userId = String(req.user.userId);
+    const progress = getUserProgress(userId);
     res.json({
       success: true,
       data: progress
@@ -137,8 +153,16 @@ router.get('/', (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.post('/complete-lesson', (req, res) => {
+router.post('/complete-lesson', optionalAuth, (req, res) => {
   try {
+    // Vyžadovat přihlášení pro uložení pokroku
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Pro uložení pokroku se musíte přihlásit'
+      });
+    }
+    
     const { topicId, lessonId } = req.body;
     
     if (!topicId || !lessonId) {
@@ -148,7 +172,8 @@ router.post('/complete-lesson', (req, res) => {
       });
     }
     
-    const progress = completeLesson('default', topicId, lessonId);
+    const userId = String(req.user.userId);
+    const progress = completeLesson(userId, topicId, lessonId);
     
     res.json({
       success: true,
@@ -195,8 +220,16 @@ router.post('/complete-lesson', (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.post('/save-quiz-result', (req, res) => {
+router.post('/save-quiz-result', optionalAuth, (req, res) => {
   try {
+    // Vyžadovat přihlášení pro uložení výsledků kvízu
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Pro uložení výsledků se musíte přihlásit'
+      });
+    }
+    
     const { topicId, score, percentage } = req.body;
     
     if (!topicId || score === undefined || percentage === undefined) {
@@ -206,7 +239,8 @@ router.post('/save-quiz-result', (req, res) => {
       });
     }
     
-    const result = saveQuizResult('default', topicId, score, percentage);
+    const userId = String(req.user.userId);
+    const result = saveQuizResult(userId, topicId, score, percentage);
     
     res.json({
       success: true,
@@ -246,9 +280,18 @@ router.post('/save-quiz-result', (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.post('/reset', (req, res) => {
+router.post('/reset', optionalAuth, (req, res) => {
   try {
-    const progress = resetProgress('default');
+    // Vyžadovat přihlášení pro reset pokroku
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Pro reset pokroku se musíte přihlásit'
+      });
+    }
+    
+    const userId = String(req.user.userId);
+    const progress = resetProgress(userId);
     
     res.json({
       success: true,

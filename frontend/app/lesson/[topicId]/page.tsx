@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { lessonsApi, userProgressApi, Lesson } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LessonPage() {
   const params = useParams();
   const router = useRouter();
   const topicId = parseInt(params.topicId as string);
+  const { token } = useAuth();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ export default function LessonPage() {
     setCompleting(true);
     
     try {
-      await userProgressApi.completeLesson(lesson.topicId, lesson.id);
+      await userProgressApi.completeLesson(lesson.topicId, lesson.id, token || undefined);
       router.push(`/quiz/${lesson.topicId}`);
     } catch (err) {
       console.error('Chyba při ukládání pokroku:', err);

@@ -78,10 +78,20 @@ const createTables = () => {
       badges TEXT NOT NULL DEFAULT '[]'
     );
 
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      name TEXT NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
     CREATE INDEX IF NOT EXISTS idx_quiz_results_user_id ON quiz_results(user_id);
     CREATE INDEX IF NOT EXISTS idx_lessons_topic_id ON lessons(topic_id);
     CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_id ON quiz_questions(quiz_id);
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
   `);
 
   const userStats = db.prepare('SELECT * FROM user_stats WHERE user_id = ?').get('default');

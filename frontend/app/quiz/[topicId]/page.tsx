@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { quizApi, userProgressApi, Quiz, QuizResult } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function QuizPage() {
   const params = useParams();
   const router = useRouter();
   const topicId = parseInt(params.topicId as string);
+  const { token } = useAuth();
 
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,8 @@ export default function QuizPage() {
       await userProgressApi.saveQuizResult(
         topicId,
         response.data.score,
-        response.data.score.percentage
+        response.data.score.percentage,
+        token || undefined
       );
       
       setSubmitted(true);

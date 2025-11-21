@@ -29,11 +29,13 @@ const topicsRouter = require('./routes/topics');
 const lessonsRouter = require('./routes/lessons');
 const quizRouter = require('./routes/quiz');
 const userProgressRouter = require('./routes/userProgress');
+const authRouter = require('./routes/auth');
 
 app.use('/api/topics', topicsRouter);
 app.use('/api/lessons', lessonsRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/user-progress', userProgressRouter);
+app.use('/api/auth', authRouter);
 
 /**
  * @swagger

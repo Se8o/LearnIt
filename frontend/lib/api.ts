@@ -82,6 +82,20 @@ export interface UserProgress {
   badges: string[];
 }
 
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  createdAt?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  token: string;
+  user: User;
+  message?: string;
+}
+
 // API Functions
 export const topicsApi = {
   getAll: async () => {
@@ -120,26 +134,64 @@ export const quizApi = {
 };
 
 export const userProgressApi = {
-  get: async () => {
-    const response = await api.get<{ success: boolean; data: UserProgress }>('/api/user-progress');
+  get: async (token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await api.get<{ success: boolean; data: UserProgress }>('/api/user-progress', { headers });
     return response.data;
   },
-  completeLesson: async (topicId: number, lessonId: number) => {
+  completeLesson: async (topicId: number, lessonId: number, token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await api.post<{ success: boolean; data: UserProgress }>(
       '/api/user-progress/complete-lesson',
-      { topicId, lessonId }
+      { topicId, lessonId },
+      { headers }
     );
     return response.data;
   },
-  saveQuizResult: async (topicId: number, score: any, percentage: number) => {
+  saveQuizResult: async (topicId: number, score: any, percentage: number, token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await api.post<{ success: boolean; data: UserProgress; pointsEarned: number }>(
       '/api/user-progress/save-quiz-result',
-      { topicId, score, percentage }
+      { topicId, score, percentage },
+      { headers }
     );
     return response.data;
   },
-  reset: async () => {
-    const response = await api.post<{ success: boolean; data: UserProgress }>('/api/user-progress/reset');
+  reset: async (token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await api.post<{ success: boolean; data: UserProgress }>('/api/user-progress/reset', {}, { headers });
+    return response.data;
+  },
+};
+
+export const authApi = {
+  register: async (email: string, password: string, name: string) => {
+    const response = await api.post<AuthResponse>('/api/auth/register', {
+      email,
+      password,
+      name,
+    });
+    return response.data;
+  },
+  login: async (email: string, password: string) => {
+    const response = await api.post<AuthResponse>('/api/auth/login', {
+      email,
+      password,
+    });
+    return response.data;
+  },
+  getMe: async (token: string) => {
+    const response = await api.get<{ success: boolean; user: User }>('/api/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
+  updateProfile: async (name: string, token: string) => {
+    const response = await api.put<{ success: boolean; user: User }>(
+      '/api/auth/update-profile',
+      { name },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return response.data;
   },
 };
