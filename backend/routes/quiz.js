@@ -5,6 +5,7 @@ const { getTopicById } = require('../db/models/topics');
 const { validateTopicId, validateQuizSubmit } = require('../middleware/validators');
 const { quizLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
+const { successResponse, getQuizFeedback, calculateQuizScore } = require('../utils/response-helpers');
 
 /**
  * @swagger
@@ -219,39 +220,14 @@ router.post('/submit', quizLimiter, validateQuizSubmit, asyncHandler((req, res) 
     };
   });
   
-  const correctCount = results.filter(r => r.isCorrect).length;
-  const totalQuestions = quiz.questions.length;
-  const percentage = Math.round((correctCount / totalQuestions) * 100);
+  const score = calculateQuizScore(results);
+  const { feedback, level } = getQuizFeedback(score.percentage);
   
-  let feedback = '';
-  let level = '';
-  
-  if (percentage >= 90) {
-    feedback = 'Výborně! Máš tématu opravdu rozumíš! 🌟';
-    level = 'excellent';
-  } else if (percentage >= 70) {
-    feedback = 'Dobrá práce! Pár věcí bys mohl/a ještě zopakovat. 👍';
-    level = 'good';
-  } else if (percentage >= 50) {
-    feedback = 'Není to špatné, ale doporučuji si lekci zopakovat. 📚';
-    level = 'average';
-  } else {
-    feedback = 'Zkus si lekci projít znovu a pak to zkus ještě jednou. 💪';
-    level = 'needs-improvement';
-  }
-  
-  res.json({
-    success: true,
-    data: {
-      results: results,
-      score: {
-        correct: correctCount,
-        total: totalQuestions,
-        percentage: percentage
-      },
-      feedback: feedback,
-      level: level
-    }
+  successResponse(res, {
+    results,
+    score,
+    feedback,
+    level
   });
 }));
 

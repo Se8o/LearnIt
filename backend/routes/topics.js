@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getAllTopics, getTopicById, getTopicsByCategory } = require('../db/models/topics');
+const { successResponse } = require('../utils/response-helpers');
 
 /**
  * @swagger

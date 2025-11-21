@@ -1,4 +1,5 @@
 const { getDb } = require('../setup');
+const { mapDbRow, parseJsonField, mapTopicData } = require('../../utils/db-helpers');
 
 const getAllLessons = () => {
   const db = getDb();
@@ -8,23 +9,14 @@ const getAllLessons = () => {
     LEFT JOIN topics t ON l.topic_id = t.id
   `).all();
   
-  return lessons.map(lesson => ({
-    id: lesson.id,
-    topicId: lesson.topic_id,
-    title: lesson.title,
-    content: lesson.content,
-    videoUrl: lesson.video_url,
-    videoTitle: lesson.video_title,
-    estimatedTime: lesson.estimated_time,
-    keyPoints: JSON.parse(lesson.key_points),
-    topic: {
-      id: lesson.topic_id,
-      title: lesson.topic_title,
-      category: lesson.category,
-      icon: lesson.icon,
-      color: lesson.color
-    }
-  }));
+  return lessons.map(lesson => {
+    const mapped = mapDbRow(lesson);
+    return {
+      ...mapped,
+      keyPoints: parseJsonField(lesson.key_points),
+      topic: mapTopicData(lesson)
+    };
+  });
 };
 
 const getLessonByTopicId = (topicId) => {
@@ -38,25 +30,11 @@ const getLessonByTopicId = (topicId) => {
   
   if (!lesson) return null;
   
+  const mapped = mapDbRow(lesson);
   return {
-    id: lesson.id,
-    topicId: lesson.topic_id,
-    title: lesson.title,
-    content: lesson.content,
-    videoUrl: lesson.video_url,
-    videoTitle: lesson.video_title,
-    estimatedTime: lesson.estimated_time,
-    keyPoints: JSON.parse(lesson.key_points),
-    topic: {
-      id: lesson.topic_id,
-      title: lesson.topic_title,
-      category: lesson.category,
-      description: lesson.description,
-      difficulty: lesson.difficulty,
-      duration: lesson.duration,
-      icon: lesson.icon,
-      color: lesson.color
-    }
+    ...mapped,
+    keyPoints: parseJsonField(lesson.key_points),
+    topic: mapTopicData(lesson)
   };
 };
 

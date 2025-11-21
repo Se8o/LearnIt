@@ -1,4 +1,5 @@
 const { getDb } = require('../setup');
+const { mapDbRow, parseJsonField, mapTopicData } = require('../../utils/db-helpers');
 
 const getQuizByTopicId = (topicId) => {
   const db = getDb();
@@ -18,24 +19,17 @@ const getQuizByTopicId = (topicId) => {
     WHERE quiz_id = ?
   `).all(quiz.id);
   
+  const mapped = mapDbRow(quiz);
   return {
-    id: quiz.id,
-    topicId: quiz.topic_id,
-    title: quiz.title,
+    ...mapped,
     questions: questions.map(q => ({
       id: q.id,
       question: q.question,
-      options: JSON.parse(q.options),
+      options: parseJsonField(q.options),
       correctAnswer: q.correct_answer,
       explanation: q.explanation
     })),
-    topic: {
-      id: quiz.topic_id,
-      title: quiz.topic_title,
-      category: quiz.category,
-      icon: quiz.icon,
-      color: quiz.color
-    }
+    topic: mapTopicData(quiz)
   };
 };
 

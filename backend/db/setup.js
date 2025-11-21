@@ -110,8 +110,6 @@ const createTables = () => {
   if (!userStats) {
     db.prepare('INSERT INTO user_stats (user_id, total_points, level, badges) VALUES (?, ?, ?, ?)').run('default', 0, 1, '[]');
   }
-
-  console.log('Database tables created successfully');
 };
 
 const getDb = () => db;

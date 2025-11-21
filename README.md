@@ -1,87 +1,106 @@
 # LearnIt - Interaktivní vzdělávací platforma 🎓
 
-Moderní vzdělávací platforma kombinující AI, mikro-učení a gamifikaci pro efektivní a zábavný způsob učení.
+Moderní full-stack vzdělávací platforma kombinující mikro-učení, gamifikaci a personalizovaný obsah pro efektivní a zábavný způsob učení.
 
 ## 📖 O projektu
 
-LearnIt je interaktivní vzdělávací platforma, která propojuje umělou inteligenci, mikro-učení a zábavný přístup k poznávání. Uživatel si zvolí téma a systém mu připraví krátkou lekci na míru s vysvětlením, videem a kvízem.
+LearnIt je interaktivní vzdělávací platforma, která propojuje krátké lekce, multimediální obsah a gamifikaci. Uživatelé si zvolí téma a systém jim připraví 5minutovou lekci s vysvětlením, videem a kvízem.
 
-### Klíčové funkce
+### ✨ Klíčové funkce
+
 - ✅ **Mikro-lekce** - Max 5 minut, ideální pro „scroll & learn"
-- ✅ **Personalizace** - Obsah přizpůsobený úrovni znalostí
-- ✅ **Multimediální obsah** - Text + video + kvíz
-- ✅ **Gamifikace** - Body, odznaky, úrovně
-- 🔄 **AI generování** (připraveno pro budoucnost)
-- 🔄 **Doporučovací systém** (připraveno pro budoucnost)
+- ✅ **Multimediální obsah** - Text (Markdown) + YouTube videa + kvízy
+- ✅ **Gamifikace** - Body, odznaky, úrovně, sledování pokroku
+- ✅ **Autentizace** - JWT tokens, refresh tokens, bezpečné přihlášení
+- ✅ **RESTful API** - Swagger dokumentace, validace, rate limiting
+- ✅ **Moderní frontend** - Next.js 15, React 19, TypeScript, Tailwind CSS
+- ✅ **Testování** - 74 unit a integration testů (100% pass rate)
 
-## 🎯 MVP Funkce
-
-Aktuální verze obsahuje:
-- 3 předpřipravená témata (Fyzika, Biologie, Psychologie)
-- Kompletní lekce s markdown obsahem
-- Integrovaná YouTube videa
-- Interaktivní kvízy s vyhodnocením
-- Systém gamifikace (body, úrovně, odznaky)
-- RESTful API backend
-
-## 🏗️ Architektura projektu
+## 🏗️ Architektura
 
 ```
 LearnIt/
-├── backend/           # Node.js/Express API server
-│   ├── data/         # Mock data (témata, lekce, kvízy)
-│   ├── routes/       # API endpointy
-│   ├── server.js     # Hlavní server
-│   └── README.md     # Backend dokumentace
-└── README.md         # Tento soubor
+├── backend/              # Node.js/Express API
+│   ├── __tests__/       # Jest unit & integration tests (74 tests)
+│   ├── config/          # Environment, logger, Swagger
+│   ├── data/            # Mock data (topics, lessons, quizzes)
+│   ├── db/              # SQLite setup & models
+│   ├── middleware/      # Auth, validation, rate limiting, error handling
+│   ├── routes/          # API endpoints
+│   ├── src/types/       # TypeScript type definitions
+│   ├── utils/           # Helper utilities (db-helpers)
+│   └── server.js        # Main server entry
+│
+├── frontend/            # Next.js application
+│   ├── app/             # App Router pages
+│   ├── components/      # React components
+│   ├── context/         # Auth context
+│   └── lib/             # API client
+│
+└── docs/                # Documentation (guides, API tests)
 ```
 
-## 🚀 Jak spustit projekt
+## 🚀 Rychlý start
 
-### Backend
+### Prerekvizity
+- Node.js 18+ a npm
+- Git
 
-1. Přejděte do složky backend:
+### Instalace a spuštění
+
 ```bash
+# 1. Klonovat repository
+git clone https://github.com/Se8o/LearnIt.git
+cd LearnIt
+
+# 2. Backend setup
 cd backend
-```
-
-2. Nainstalujte závislosti:
-```bash
 npm install
-```
+cp .env.example .env  # Upravit env variables
+npm start             # Production mode
+# NEBO
+npm run dev          # Development mode s auto-reload
 
-3. Spusťte server:
-```bash
-npm start
-# nebo pro development mode s auto-reloadem:
+# 3. Frontend setup (v novém terminálu)
+cd frontend
+npm install
 npm run dev
+
+# 4. Otevřít v prohlížeči
+Frontend: http://localhost:3000
+Backend API docs: http://localhost:3001/api-docs
 ```
 
-4. Backend poběží na `http://localhost:3001`
+### Environment proměnné (.env)
 
-5. Otevřete v prohlížeči interaktivní API dokumentaci:
-```
-http://localhost:3001/api-docs
-```
+```env
+# Server
+PORT=3001
+NODE_ENV=development
 
-### Frontend
+# Security
+JWT_SECRET=your-super-secret-jwt-key-min-32-characters
+JWT_REFRESH_SECRET=your-super-secret-refresh-key-min-32-characters
+ACCESS_TOKEN_EXPIRY=15m
+REFRESH_TOKEN_EXPIRY=7d
 
-Otevřete v prohlížeči nebo použijte curl/Postman:
-```bash
-# Health check
-curl http://localhost:5000/api/health
+# CORS
+CORS_ORIGIN=http://localhost:3000
 
-# Získat všechna témata
-curl http://localhost:5000/api/topics
-
-# Získat lekci pro téma ID 1
-curl http://localhost:5000/api/lessons/1
-
-# Získat kvíz pro téma ID 1
-curl http://localhost:5000/api/quiz/1
+# Logging
+LOG_LEVEL=info
 ```
 
 ## 📡 API Endpointy
+
+### Autentizace
+- `POST /api/auth/register` - Registrace nového uživatele
+- `POST /api/auth/login` - Přihlášení (access + refresh token)
+- `POST /api/auth/refresh` - Obnovení access tokenu
+- `POST /api/auth/logout` - Odhlášení (revoke token)
+- `POST /api/auth/logout-all` - Odhlášení ze všech zařízení
+- `GET /api/auth/me` - Informace o přihlášeném uživateli
+- `PUT /api/auth/profile` - Aktualizace profilu
 
 ### Témata
 - `GET /api/topics` - Seznam všech témat
@@ -90,212 +109,204 @@ curl http://localhost:5000/api/quiz/1
 
 ### Lekce
 - `GET /api/lessons` - Všechny lekce
-- `GET /api/lessons/:topicId` - Lekce pro dané téma
+- `GET /api/lessons/:topicId` - Lekce pro téma
 
 ### Kvízy
-- `GET /api/quiz/:topicId` - Kvíz pro dané téma
+- `GET /api/quiz/:topicId` - Kvíz pro téma
 - `POST /api/quiz/submit` - Odeslat odpovědi a získat hodnocení
 
 ### Uživatelský pokrok
 - `GET /api/user-progress` - Pokrok uživatele
 - `POST /api/user-progress/complete-lesson` - Označit lekci jako dokončenou
 - `POST /api/user-progress/save-quiz-result` - Uložit výsledek kvízu
+- `POST /api/user-progress/reset` - Resetovat pokrok
+
+**📚 Kompletní API dokumentace:** [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
 
 ## 🎨 Dostupná témata
 
-### 1. Fyzika - Newtonovy zákony pohybu ⚛️
-- Úroveň: Začátečník
-- Délka: 5 minut
-- Obsahuje: 3 zákony pohybu, vzorce, praktické příklady
-- Kvíz: 4 otázky
+1. **Fyzika - Newtonovy zákony pohybu** ⚛️ (Začátečník, 5 min)
+2. **Biologie - Buněčná stavba** 🧬 (Začátečník, 4 min)
+3. **Psychologie - Základy motivace** 🧠 (Začátečník, 5 min)
 
-### 2. Biologie - Buněčná stavba 🧬
-- Úroveň: Začátečník
-- Délka: 4 minuty
-- Obsahuje: Prokaryotické vs eukaryotické buňky, organely
-- Kvíz: 4 otázky
-
-### 3. Psychologie - Základy motivace 🧠
-- Úroveň: Začátečník
-- Délka: 5 minut
-- Obsahuje: Typy motivace, Maslowova pyramida, SMART cíle
-- Kvíz: 4 otázky
+Každé téma obsahuje:
+- Markdown lekci s vysvětlením
+- Integrované YouTube video
+- Interaktivní kvíz (4 otázky)
+- Klíčové body k zapamatování
 
 ## 💻 Technologie
 
-### Backend (Aktuální)
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **CORS** - Cross-origin support
-- **dotenv** - Environment variables
-- **Swagger/OpenAPI** - Interaktivní API dokumentace
+### Backend
+- **Runtime:** Node.js + Express.js
+- **Databáze:** SQLite (Better-SQLite3)
+- **Autentizace:** JWT tokens, bcrypt
+- **Validace:** Express-validator
+- **Dokumentace:** Swagger/OpenAPI
+- **Logging:** Winston
+- **Security:** Rate limiting, CORS, helmet
+- **Testing:** Jest, Supertest (74 tests, 100% pass)
+- **Připraveno pro TypeScript** - Types definované, migration guide
 
-### Plánované technologie
-- **Frontend**: React / Next.js
-- **Databáze**: Microsoft SQL Server (MSSQL)
-- **AI**: OpenAI GPT / Anthropic Claude
-- **Auth**: JWT tokens
-- **Hosting**: Azure / AWS
-
-## 📊 Databázové schéma (připraveno pro MSSQL)
-
-```sql
--- Tabulky pro budoucí implementaci
-topics
-├── id (PK)
-├── title
-├── category
-├── description
-├── difficulty
-├── duration
-├── icon
-└── color
-
-lessons
-├── id (PK)
-├── topic_id (FK)
-├── title
-├── content (text/markdown)
-├── video_url
-├── estimated_time
-└── created_at
-
-quizzes
-├── id (PK)
-├── topic_id (FK)
-└── title
-
-quiz_questions
-├── id (PK)
-├── quiz_id (FK)
-├── question
-├── options (JSON)
-├── correct_answer
-└── explanation
-
-users
-├── id (PK)
-├── email
-├── password_hash
-├── name
-├── level
-├── total_points
-└── created_at
-
-user_progress
-├── id (PK)
-├── user_id (FK)
-├── lesson_id (FK)
-├── completed_at
-└── quiz_score
-```
+### Frontend
+- **Framework:** Next.js 15 (App Router)
+- **React:** 19
+- **TypeScript:** Plně typované
+- **Styling:** Tailwind CSS
+- **HTTP Client:** Axios
+- **Markdown:** React-markdown
+- **State:** Context API + React hooks
 
 ## 🎮 Gamifikace
 
-### Body systém
-- Dokončená lekce: 10 bodů
-- Úspěšný kvíz: 1-10 bodů (podle výsledku)
-- Každých 100 bodů = nová úroveň
+### Bodový systém
+- Dokončená lekce: **10 bodů**
+- Kvíz: **1-10 bodů** (podle výsledku)
+- Každých **100 bodů** = **nová úroveň**
 
 ### Odznaky
 - 🌟 **Perfect Score** - 100% v kvízu
 - 📚 **Beginner** - 3 dokončené lekce
-- (Více odznaků připraveno pro budoucnost)
+- 🎓 **Advanced Learner** - 10 dokončených lekcí
+- 🏆 **Quiz Master** - 5 perfektních kvízů
+
+## 🧪 Testování
+
+```bash
+# Spustit všechny testy
+cd backend
+npm test
+
+# Spustit s coverage
+npm run test:coverage
+
+# Spustit watch mode
+npm run test:watch
+
+# Jednotlivé test suites
+npm test -- __tests__/unit/
+npm test -- __tests__/integration/
+```
+
+**Test Coverage:**
+- Unit tests: 41/41 (errorHandler, userModel, refreshTokenModel)
+- Integration tests: 33/33 (auth API, quiz API)
+- **Total: 74/74 tests passing ✅**
+
+## 📊 Databáze (SQLite)
+
+### Schéma
+- `users` - Uživatelské účty (email, password_hash, name)
+- `refresh_tokens` - JWT refresh tokeny
+- `topics` - Vzdělávací témata
+- `lessons` - Lekce s obsahem
+- `quizzes` - Kvízy
+- `quiz_questions` - Otázky kvízů
+- `user_progress` - Dokončené lekce
+- `quiz_results` - Výsledky kvízů
+- `user_stats` - Body, úrovně, odznaky
+
+**Připraveno pro migraci na MSSQL/PostgreSQL**
+
+## 🔐 Bezpečnost
+
+- ✅ JWT access tokens (15min expiry)
+- ✅ Refresh tokens (7 days, revokable)
+- ✅ Bcrypt password hashing (10 rounds)
+- ✅ Rate limiting (anti brute-force)
+- ✅ Input validation (express-validator)
+- ✅ CORS configured
+- ✅ Helmet security headers
+- ✅ Error handling middleware
+- ✅ SQL injection prevention (prepared statements)
+
+## 📚 Dokumentace
+
+- [Quick Start Guide](./QUICK_START.md)
+- [Backend API Tests](./backend/API_TESTS.md)
+- [Swagger Guide](./backend/SWAGGER_GUIDE.md)
+- [Refresh Token Guide](./REFRESH_TOKEN_GUIDE.md)
+- [TypeScript Migration](./backend/TYPESCRIPT_MIGRATION.md)
+- [MVP Complete](./MVP_COMPLETE.md)
+
+## 🛠️ Development
+
+### Užitečné příkazy
+
+```bash
+# Backend
+cd backend
+npm run dev          # Development server s nodemon
+npm run seed         # Seed database with data
+npm test             # Run all tests
+npm run test:watch   # Test watch mode
+
+# Frontend
+cd frontend
+npm run dev          # Development server
+npm run build        # Production build
+npm run lint         # ESLint check
+```
+
+### Code Quality
+- ESLint configured
+- TypeScript ready
+- Jest tests with 100% pass rate
+- Winston structured logging
+- Database helpers (no code duplication)
 
 ## 🔮 Roadmap
 
-### Fáze 1: MVP ✅ (Aktuální)
-- [x] Backend API s mock daty
-- [x] 3 předpřipravená témata
-- [x] Kvízy a vyhodnocení
-- [x] Základní gamifikace
+### ✅ Fáze 1: MVP (HOTOVO)
+- [x] Backend API s databází
+- [x] Frontend aplikace
+- [x] Autentizace
+- [x] Gamifikace
+- [x] Testing (74/74)
+- [x] Security (JWT, rate limiting)
 
-### Fáze 2: Frontend (Příští krok)
-- [ ] React/Next.js aplikace
-- [ ] Responsivní design
-- [ ] Přehrávač videí
-- [ ] Interaktivní kvízy
-- [ ] Dashboard uživatele
+### 🔄 Fáze 2: Vylepšení (Příští)
+- [ ] Admin panel pro správu obsahu
+- [ ] Vyhledávání témat
+- [ ] Filtry (kategorie, obtížnost)
+- [ ] User dashboard s grafy
+- [ ] Social features (sdílení, komentáře)
 
-### Fáze 3: Databáze
-- [ ] MSSQL integrace
-- [ ] Migrace z mock dat
-- [ ] Autentizace uživatelů
-- [ ] Perzistence dat
-
-### Fáze 4: AI Integrace
-- [ ] OpenAI API integrace
-- [ ] Generování obsahu podle úrovně
+### 🎯 Fáze 3: AI & Personalizace
+- [ ] OpenAI/Claude integrace
+- [ ] AI generování obsahu
 - [ ] Personalizované doporučení
 - [ ] Adaptivní obtížnost
 
-### Fáze 5: Produkce
-- [ ] Admin panel
-- [ ] Analytics
-- [ ] Platební systém
-- [ ] Firemní licence
-- [ ] Mobile aplikace
+### 🚀 Fáze 4: Produkce
+- [ ] Migrace na PostgreSQL/MSSQL
+- [ ] Docker containerizace
+- [ ] CI/CD pipeline
+- [ ] Monitoring & analytics
+- [ ] Mobile aplikace (React Native)
+- [ ] Platební systém (Stripe)
 
 ## 🎯 Cílová skupina
 
 - **Studenti** - Efektivní příprava na zkoušky
-- **Profesionálové** - Rychlé rozšíření znalostí
+- **Profesionálové** - Rozšíření znalostí v oboru
 - **Firmy** - Onboarding a školení zaměstnanců
-- **Lifelong learners** - Osobní rozvoj
+- **Lifelong learners** - Osobní rozvoj a zábava
 
 ## 💰 Monetizační model (plánovaný)
 
-1. **Freemium** - Základní obsah zdarma
+1. **Freemium** - Základní témata zdarma
 2. **Premium** - Rozšířený obsah, AI funkce
-3. **Firemní licence** - Vlastní obsah, analytics
-4. **Partnerství** - Spolupráce s tvůrci obsahu
-
-## 📝 Poznámky k MVP
-
-Tato verze je **demonstrační MVP** pro ukázku konceptu:
-- ✅ Plně funkční API
-- ✅ Mock data připravená pro 3 témata
-- ✅ Připraveno pro MSSQL migraci
-- ⏳ Bez skutečného AI (připraveno)
-- ⏳ Bez autentizace (připraveno)
-- ⏳ Bez persistentní databáze (data v paměti)
-
-## 🛠️ Jak pokračovat v development
-
-### 1. Vytvoření frontendu
-```bash
-# Vytvořit Next.js aplikaci
-npx create-next-app@latest frontend
-cd frontend
-npm install axios
-```
-
-### 2. Připojení k MSSQL
-```bash
-cd backend
-npm install mssql
-# Vytvořit db config a migrace
-```
-
-### 3. Přidání AI
-```bash
-npm install openai
-# Nebo
-npm install @anthropic-ai/sdk
-```
-
-### 4. Autentizace
-```bash
-npm install jsonwebtoken bcrypt
-```
+3. **Business** - Firemní licence, vlastní obsah
+4. **Partnership** - Spolupráce s tvůrci obsahu
 
 ## 📄 Licence
 
 Tento projekt je vytvořen pro vzdělávací účely.
 
-## 👥 Autoři
+## 👥 Autor
 
-LearnIt Development Team
+Se8o - [GitHub](https://github.com/Se8o/LearnIt)
 
 ---
 

@@ -1,10 +1,11 @@
 const { createTables, getDb } = require('./setup');
+const { logger } = require('../config/logger');
 const topicsData = require('../data/topics');
 const lessonsData = require('../data/lessons');
 const quizzesData = require('../data/quizzes');
 
 const seedDatabase = () => {
-  console.log('Starting database seeding...');
+  logger.info('Starting database seeding...');
   
   createTables();
   
@@ -12,11 +13,11 @@ const seedDatabase = () => {
   
   const existingTopics = db.prepare('SELECT COUNT(*) as count FROM topics').get();
   if (existingTopics.count > 0) {
-    console.log('Database already seeded. Skipping...');
+    logger.info('Database already seeded. Skipping...');
     return;
   }
   
-  console.log('Seeding topics...');
+  logger.info('Seeding topics...');
   const topicStmt = db.prepare(`
     INSERT INTO topics (id, title, category, description, difficulty, duration, icon, color)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -34,9 +35,9 @@ const seedDatabase = () => {
       topic.color
     );
   }
-  console.log(`Seeded ${topicsData.length} topics`);
+  logger.info(`Seeded ${topicsData.length} topics`);
   
-  console.log('Seeding lessons...');
+  logger.info('Seeding lessons...');
   const lessonStmt = db.prepare(`
     INSERT INTO lessons (id, topic_id, title, content, video_url, video_title, estimated_time, key_points)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -54,9 +55,9 @@ const seedDatabase = () => {
       JSON.stringify(lesson.keyPoints)
     );
   }
-  console.log(`Seeded ${lessonsData.length} lessons`);
+  logger.info(`Seeded ${lessonsData.length} lessons`);
   
-  console.log('Seeding quizzes...');
+  logger.info('Seeding quizzes...');
   for (const quiz of quizzesData) {
     const quizResult = db.prepare(`
       INSERT INTO quizzes (id, topic_id, title)
@@ -80,9 +81,9 @@ const seedDatabase = () => {
       );
     }
   }
-  console.log(`Seeded ${quizzesData.length} quizzes`);
+  logger.info(`Seeded ${quizzesData.length} quizzes`);
   
-  console.log('Database seeding completed successfully!');
+  logger.info('Database seeding completed successfully!');
 };
 
 if (require.main === module) {

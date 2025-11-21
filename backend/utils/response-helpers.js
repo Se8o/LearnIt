@@ -1,0 +1,88 @@
+/**
+ * Response helper utilities
+ * Standardizes API responses across all routes
+ */
+
+/**
+ * Sends success response with data
+ * @param {Object} res - Express response object
+ * @param {*} data - Response data
+ * @param {number} statusCode - HTTP status code (default: 200)
+ * @param {Object} meta - Additional metadata (count, pagination, etc.)
+ */
+const successResponse = (res, data, statusCode = 200, meta = {}) => {
+  const response = {
+    success: true,
+    ...meta,
+    data
+  };
+  
+  res.status(statusCode).json(response);
+};
+
+/**
+ * Sends success response for created resource
+ * @param {Object} res - Express response object
+ * @param {*} data - Created resource data
+ * @param {string} message - Success message
+ */
+const createdResponse = (res, data, message = 'Vytvořeno úspěšně') => {
+  res.status(201).json({
+    success: true,
+    message,
+    data
+  });
+};
+
+/**
+ * Calculates quiz feedback based on score percentage
+ * @param {number} percentage - Score percentage (0-100)
+ * @returns {Object} - {feedback: string, level: string}
+ */
+const getQuizFeedback = (percentage) => {
+  if (percentage >= 90) {
+    return {
+      feedback: 'Výborně! Máš tématu opravdu rozumíš! 🌟',
+      level: 'excellent'
+    };
+  } else if (percentage >= 70) {
+    return {
+      feedback: 'Dobrá práce! Pár věcí bys mohl/a ještě zopakovat. 👍',
+      level: 'good'
+    };
+  } else if (percentage >= 50) {
+    return {
+      feedback: 'Není to špatné, ale doporučuji si lekci zopakovat. 📚',
+      level: 'average'
+    };
+  } else {
+    return {
+      feedback: 'Zkus si lekci projít znovu a pak to zkus ještě jednou. 💪',
+      level: 'needs-improvement'
+    };
+  }
+};
+
+/**
+ * Calculates quiz score
+ * @param {Array} results - Array of quiz results with isCorrect property
+ * @returns {Object} - {correct, total, percentage}
+ */
+const calculateQuizScore = (results) => {
+  const correctCount = results.filter(r => r.isCorrect).length;
+  const totalQuestions = results.length;
+  const percentage = Math.round((correctCount / totalQuestions) * 100);
+  
+  return {
+    correct: correctCount,
+    total: totalQuestions,
+    percentage
+  };
+};
+
+module.exports = {
+  successResponse,
+  createdResponse,
+  getQuizFeedback,
+  calculateQuizScore
+};
