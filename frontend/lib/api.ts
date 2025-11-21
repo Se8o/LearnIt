@@ -9,6 +9,55 @@ const api = axios.create({
   },
 });
 
+// Axios interceptor pro automatické obnovení tokenu
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Pokud je 401 a ještě jsme nezkusili refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          // Nemáme refresh token, přesměrujeme na login
+          localStorage.removeItem('accessToken');
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          return Promise.reject(error);
+        }
+
+        // Zkusíme získat nový access token
+        const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
+          refreshToken,
+        });
+
+        const { accessToken } = response.data;
+        localStorage.setItem('accessToken', accessToken);
+
+        // Aktualizujeme Authorization header pro původní request
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        // Zopakujeme původní request s novým tokenem
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh selhal, vymažeme tokeny a přesměrujeme na login
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // Types
 export interface Topic {
   id: number;
@@ -91,7 +140,8 @@ export interface User {
 
 export interface AuthResponse {
   success: boolean;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
   user: User;
   message?: string;
 }
@@ -178,6 +228,26 @@ export const authApi = {
       email,
       password,
     });
+    return response.data;
+  },
+  refresh: async (refreshToken: string) => {
+    const response = await api.post<{ success: boolean; accessToken: string; user: User }>('/api/auth/refresh', {
+      refreshToken,
+    });
+    return response.data;
+  },
+  logout: async (refreshToken: string) => {
+    const response = await api.post<{ success: boolean; message: string }>('/api/auth/logout', {
+      refreshToken,
+    });
+    return response.data;
+  },
+  logoutAll: async (token: string) => {
+    const response = await api.post<{ success: boolean; message: string }>(
+      '/api/auth/logout-all',
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return response.data;
   },
   getMe: async (token: string) => {

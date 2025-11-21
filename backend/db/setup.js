@@ -87,11 +87,23 @@ const createTables = () => {
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS refresh_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      revoked BOOLEAN NOT NULL DEFAULT 0,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
     CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
     CREATE INDEX IF NOT EXISTS idx_quiz_results_user_id ON quiz_results(user_id);
     CREATE INDEX IF NOT EXISTS idx_lessons_topic_id ON lessons(topic_id);
     CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_id ON quiz_questions(quiz_id);
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+    CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);
   `);
 
   const userStats = db.prepare('SELECT * FROM user_stats WHERE user_id = ?').get('default');

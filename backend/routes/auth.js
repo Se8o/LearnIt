@@ -7,6 +7,13 @@ const { AppError, asyncHandler } = require('../middleware/errorHandler');
 const { validateRegister, validateLogin, validateUpdateProfile } = require('../middleware/validators');
 const { authLimiter, registerLimiter } = require('../middleware/rateLimiter');
 const { logger } = require('../config/logger');
+const { config } = require('../config/env');
+const { 
+  createRefreshToken, 
+  verifyRefreshToken, 
+  revokeRefreshToken,
+  revokeAllUserTokens 
+} = require('../db/models/refreshTokens');
 
 /**
  * @swagger
@@ -95,18 +102,23 @@ router.post('/register', registerLimiter, validateRegister, asyncHandler(async (
 
   const user = await createUser(email, password, name);
 
-  const token = jwt.sign(
+  // Vytvořit access token (krátká expirace)
+  const accessToken = jwt.sign(
     { userId: user.id, email: user.email },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: config.jwt.accessTokenExpiry }
   );
+
+  // Vytvořit refresh token (dlouhá expirace)
+  const refreshToken = createRefreshToken(user.id);
 
   logger.info('User registered successfully', { userId: user.id, email });
 
   res.status(201).json({
     success: true,
     message: 'Uživatel úspěšně vytvořen',
-    token,
+    accessToken,
+    refreshToken: refreshToken.token,
     user: {
       id: user.id,
       email: user.email,
@@ -165,18 +177,23 @@ router.post('/login', authLimiter, validateLogin, asyncHandler(async (req, res) 
     throw new AppError('Neplatný email nebo heslo', 401);
   }
 
-  const token = jwt.sign(
+  // Vytvořit access token (krátká expirace)
+  const accessToken = jwt.sign(
     { userId: user.id, email: user.email },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: config.jwt.accessTokenExpiry }
   );
+
+  // Vytvořit refresh token (dlouhá expirace)
+  const refreshToken = createRefreshToken(user.id);
 
   logger.info('User logged in successfully', { userId: user.id, email });
 
   res.json({
     success: true,
     message: 'Úspěšně přihlášen',
-    token,
+    accessToken,
+    refreshToken: refreshToken.token,
     user: {
       id: user.id,
       email: user.email,
@@ -261,6 +278,125 @@ router.put('/update-profile', authenticateToken, validateUpdateProfile, asyncHan
     success: true,
     message: 'Profil aktualizován',
     user: updatedUser
+  });
+}));
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Obnovit access token pomocí refresh tokenu
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Nový access token
+ *       401:
+ *         description: Neplatný nebo expirovaný refresh token
+ */
+router.post('/refresh', asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    throw new AppError('Refresh token je povinný', 400);
+  }
+
+  const verification = verifyRefreshToken(refreshToken);
+
+  if (!verification.valid) {
+    logger.warn('Refresh token verification failed', { error: verification.error });
+    throw new AppError(verification.error, 401);
+  }
+
+  const user = getUserById(verification.userId);
+
+  if (!user) {
+    throw new AppError('Uživatel nenalezen', 404);
+  }
+
+  // Vytvoř nový access token
+  const accessToken = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: config.jwt.accessTokenExpiry }
+  );
+
+  logger.info('Access token refreshed', { userId: user.id });
+
+  res.json({
+    success: true,
+    accessToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name
+    }
+  });
+}));
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Odhlásit uživatele (revokovat refresh token)
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Úspěšné odhlášení
+ */
+router.post('/logout', asyncHandler((req, res) => {
+  const { refreshToken } = req.body;
+
+  if (refreshToken) {
+    revokeRefreshToken(refreshToken);
+    logger.info('User logged out', { refreshToken: refreshToken.substring(0, 10) + '...' });
+  }
+
+  res.json({
+    success: true,
+    message: 'Úspěšně odhlášen'
+  });
+}));
+
+/**
+ * @swagger
+ * /api/auth/logout-all:
+ *   post:
+ *     summary: Odhlásit ze všech zařízení (revokovat všechny refresh tokeny)
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Úspěšné odhlášení ze všech zařízení
+ */
+router.post('/logout-all', authenticateToken, asyncHandler((req, res) => {
+  const result = revokeAllUserTokens(req.user.userId);
+  
+  logger.info('User logged out from all devices', { userId: req.user.userId, tokensRevoked: result.changes });
+
+  res.json({
+    success: true,
+    message: `Odhlášeno ze všech zařízení (${result.changes} tokenů revokováno)`
   });
 }));
 

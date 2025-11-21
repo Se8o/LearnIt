@@ -8,7 +8,8 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  refreshToken: () => Promise<boolean>;
   loading: boolean;
 }
 
@@ -20,13 +21,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
+    // Načíst oba tokeny z localStorage
+    const storedToken = localStorage.getItem('accessToken');
+    const storedRefreshToken = localStorage.getItem('refreshToken');
+    
+    if (storedToken && storedRefreshToken) {
       setToken(storedToken);
       loadUser(storedToken);
+    } else if (storedRefreshToken) {
+      // Pokud máme jen refresh token, zkusíme získat nový access token
+      refreshAccessToken(storedRefreshToken);
     } else {
       setLoading(false);
     }
+
+    // Nastavit automatické obnovování tokenu každých 14 minut (access token vyprší za 15min)
+    const intervalId = setInterval(() => {
+      const refreshTok = localStorage.getItem('refreshToken');
+      if (refreshTok) {
+        refreshAccessToken(refreshTok);
+      }
+    }, 14 * 60 * 1000); // 14 minut
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const loadUser = async (authToken: string) => {
@@ -35,35 +52,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(response.user);
     } catch (error) {
       console.error('Failed to load user:', error);
-      localStorage.removeItem('token');
-      setToken(null);
+      // Pokud selže, zkusíme refresh token
+      const refreshTok = localStorage.getItem('refreshToken');
+      if (refreshTok) {
+        await refreshAccessToken(refreshTok);
+      } else {
+        clearAuthData();
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const refreshAccessToken = async (refreshTok: string): Promise<boolean> => {
+    try {
+      const response = await authApi.refresh(refreshTok);
+      setToken(response.accessToken);
+      setUser(response.user);
+      localStorage.setItem('accessToken', response.accessToken);
+      return true;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      clearAuthData();
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearAuthData = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  };
+
   const login = async (email: string, password: string) => {
     const response = await authApi.login(email, password);
-    setToken(response.token);
+    setToken(response.accessToken);
     setUser(response.user);
-    localStorage.setItem('token', response.token);
+    localStorage.setItem('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
   };
 
   const register = async (email: string, password: string, name: string) => {
     const response = await authApi.register(email, password, name);
-    setToken(response.token);
+    setToken(response.accessToken);
     setUser(response.user);
-    localStorage.setItem('token', response.token);
+    localStorage.setItem('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
+  const logout = async () => {
+    const refreshTok = localStorage.getItem('refreshToken');
+    if (refreshTok) {
+      try {
+        await authApi.logout(refreshTok);
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
+    }
+    clearAuthData();
+  };
+
+  const refreshToken = async (): Promise<boolean> => {
+    const refreshTok = localStorage.getItem('refreshToken');
+    if (!refreshTok) return false;
+    return await refreshAccessToken(refreshTok);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, refreshToken, loading }}>
       {children}
     </AuthContext.Provider>
   );
