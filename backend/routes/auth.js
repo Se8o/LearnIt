@@ -3,6 +3,10 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { createUser, getUserByEmail, getUserById, validatePassword, updateUser } = require('../db/models/users');
 const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
+const { AppError, asyncHandler } = require('../middleware/errorHandler');
+const { validateRegister, validateLogin, validateUpdateProfile } = require('../middleware/validators');
+const { authLimiter, registerLimiter } = require('../middleware/rateLimiter');
+const { logger } = require('../config/logger');
 
 /**
  * @swagger
@@ -84,56 +88,32 @@ const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
  *       400:
  *         description: Chybějící data nebo email již existuje
  */
-router.post('/register', async (req, res) => {
-  try {
-    const { email, password, name } = req.body;
+router.post('/register', registerLimiter, validateRegister, asyncHandler(async (req, res) => {
+  const { email, password, name } = req.body;
 
-    if (!email || !password || !name) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email, heslo a jméno jsou povinné'
-      });
+  logger.info('Registration attempt', { email, name });
+
+  const user = await createUser(email, password, name);
+
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  logger.info('User registered successfully', { userId: user.id, email });
+
+  res.status(201).json({
+    success: true,
+    message: 'Uživatel úspěšně vytvořen',
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name
     }
-
-    if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        error: 'Heslo musí mít alespoň 6 znaků'
-      });
-    }
-
-    const user = await createUser(email, password, name);
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.status(201).json({
-      success: true,
-      message: 'Uživatel úspěšně vytvořen',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
-    });
-  } catch (error) {
-    if (error.message === 'Email již existuje') {
-      return res.status(400).json({
-        success: false,
-        error: error.message
-      });
-    }
-    
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při vytváření uživatele'
-    });
-  }
-});
+  });
+}));
 
 /**
  * @swagger
@@ -166,58 +146,44 @@ router.post('/register', async (req, res) => {
  *       401:
  *         description: Neplatné přihlašovací údaje
  */
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
+router.post('/login', authLimiter, validateLogin, asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email a heslo jsou povinné'
-      });
-    }
+  logger.info('Login attempt', { email });
 
-    const user = getUserByEmail(email);
+  const user = getUserByEmail(email);
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: 'Neplatný email nebo heslo'
-      });
-    }
-
-    const isValidPassword = await validatePassword(password, user.passwordHash);
-
-    if (!isValidPassword) {
-      return res.status(401).json({
-        success: false,
-        error: 'Neplatný email nebo heslo'
-      });
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      success: true,
-      message: 'Úspěšně přihlášen',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při přihlašování'
-    });
+  if (!user) {
+    logger.warn('Login failed - user not found', { email });
+    throw new AppError('Neplatný email nebo heslo', 401);
   }
-});
+
+  const isValidPassword = await validatePassword(password, user.passwordHash);
+
+  if (!isValidPassword) {
+    logger.warn('Login failed - invalid password', { email, userId: user.id });
+    throw new AppError('Neplatný email nebo heslo', 401);
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  logger.info('User logged in successfully', { userId: user.id, email });
+
+  res.json({
+    success: true,
+    message: 'Úspěšně přihlášen',
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name
+    }
+  });
+}));
 
 /**
  * @swagger
@@ -242,33 +208,23 @@ router.post('/login', async (req, res) => {
  *       401:
  *         description: Nepřihlášen
  */
-router.get('/me', authenticateToken, (req, res) => {
-  try {
-    const user = getUserById(req.user.userId);
+router.get('/me', authenticateToken, asyncHandler((req, res) => {
+  const user = getUserById(req.user.userId);
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'Uživatel nenalezen'
-      });
-    }
-
-    res.json({
-      success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        createdAt: user.createdAt
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání uživatele'
-    });
+  if (!user) {
+    throw new AppError('Uživatel nenalezen', 404);
   }
-});
+
+  res.json({
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt
+    }
+  });
+}));
 
 /**
  * @swagger
@@ -294,30 +250,18 @@ router.get('/me', authenticateToken, (req, res) => {
  *       401:
  *         description: Nepřihlášen
  */
-router.put('/update-profile', authenticateToken, (req, res) => {
-  try {
-    const { name } = req.body;
+router.put('/update-profile', authenticateToken, validateUpdateProfile, asyncHandler((req, res) => {
+  const { name } = req.body;
 
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        error: 'Jméno je povinné'
-      });
-    }
+  const updatedUser = updateUser(req.user.userId, { name });
 
-    const updatedUser = updateUser(req.user.userId, { name });
+  logger.info('User profile updated', { userId: req.user.userId });
 
-    res.json({
-      success: true,
-      message: 'Profil aktualizován',
-      user: updatedUser
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při aktualizaci profilu'
-    });
-  }
-});
+  res.json({
+    success: true,
+    message: 'Profil aktualizován',
+    user: updatedUser
+  });
+}));
 
 module.exports = router;

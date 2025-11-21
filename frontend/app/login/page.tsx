@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { ErrorDisplay, LoadingSpinner } from '@/components/UIComponents';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/topics');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Chyba při přihlašování');
+      setError(err.response?.data?.error || 'Chyba při přihlašování. Zkuste to prosím znovu.');
     } finally {
       setLoading(false);
     }
@@ -35,11 +36,7 @@ export default function LoginPage() {
           Přihlášení
         </h1>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
+        <ErrorDisplay error={error} onDismiss={() => setError('')} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -52,7 +49,8 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              disabled={loading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="vas@email.cz"
             />
           </div>
@@ -68,7 +66,8 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              disabled={loading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="••••••"
             />
           </div>
@@ -76,9 +75,16 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? 'Přihlašování...' : 'Přihlásit se'}
+            {loading ? (
+              <>
+                <LoadingSpinner size="sm" />
+                <span>Přihlašování...</span>
+              </>
+            ) : (
+              'Přihlásit se'
+            )}
           </button>
         </form>
 

@@ -1,12 +1,13 @@
 const { getDb } = require('../setup');
 const bcrypt = require('bcryptjs');
+const { AppError } = require('../../middleware/errorHandler');
 
 const createUser = async (email, password, name) => {
   const db = getDb();
   
   const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
   if (existingUser) {
-    throw new Error('Email již existuje');
+    throw new AppError('Tento email je již zaregistrován', 409);
   }
   
   const passwordHash = await bcrypt.hash(password, 10);

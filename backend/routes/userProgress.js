@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { getUserProgress, completeLesson, saveQuizResult, resetProgress } = require('../db/models/userProgress');
 const { optionalAuth, authenticateToken } = require('../middleware/auth');
+const { validateCompleteLesson, validateSaveQuizResult } = require('../middleware/validators');
+const { asyncHandler } = require('../middleware/errorHandler');
 
 /**
  * @swagger
@@ -153,39 +155,24 @@ router.get('/', optionalAuth, (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.post('/complete-lesson', optionalAuth, (req, res) => {
-  try {
-    // Vyžadovat přihlášení pro uložení pokroku
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        error: 'Pro uložení pokroku se musíte přihlásit'
-      });
-    }
-    
-    const { topicId, lessonId } = req.body;
-    
-    if (!topicId || !lessonId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Chybí topicId nebo lessonId'
-      });
-    }
-    
-    const userId = String(req.user.userId);
-    const progress = completeLesson(userId, topicId, lessonId);
-    
-    res.json({
-      success: true,
-      data: progress
-    });
-  } catch (error) {
-    res.status(500).json({
+router.post('/complete-lesson', optionalAuth, validateCompleteLesson, asyncHandler((req, res) => {
+  // Vyžadovat přihlášení pro uložení pokroku
+  if (!req.user) {
+    return res.status(401).json({
       success: false,
-      error: 'Chyba při ukládání pokroku'
+      error: 'Pro uložení pokroku se musíte přihlásit'
     });
   }
-});
+  
+  const { topicId, lessonId } = req.body;
+  const userId = String(req.user.userId);
+  const progress = completeLesson(userId, topicId, lessonId);
+  
+  res.json({
+    success: true,
+    data: progress
+  });
+}));
 
 /**
  * @swagger
@@ -220,40 +207,25 @@ router.post('/complete-lesson', optionalAuth, (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.post('/save-quiz-result', optionalAuth, (req, res) => {
-  try {
-    // Vyžadovat přihlášení pro uložení výsledků kvízu
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        error: 'Pro uložení výsledků se musíte přihlásit'
-      });
-    }
-    
-    const { topicId, score, percentage } = req.body;
-    
-    if (!topicId || score === undefined || percentage === undefined) {
-      return res.status(400).json({
-        success: false,
-        error: 'Chybí požadovaná data'
-      });
-    }
-    
-    const userId = String(req.user.userId);
-    const result = saveQuizResult(userId, topicId, score, percentage);
-    
-    res.json({
-      success: true,
-      data: result.progress,
-      pointsEarned: result.pointsEarned
-    });
-  } catch (error) {
-    res.status(500).json({
+router.post('/save-quiz-result', optionalAuth, validateSaveQuizResult, asyncHandler((req, res) => {
+  // Vyžadovat přihlášení pro uložení výsledků kvízu
+  if (!req.user) {
+    return res.status(401).json({
       success: false,
-      error: 'Chyba při ukládání výsledku kvízu'
+      error: 'Pro uložení výsledků se musíte přihlásit'
     });
   }
-});
+  
+  const { topicId, score, percentage } = req.body;
+  const userId = String(req.user.userId);
+  const result = saveQuizResult(userId, topicId, score, percentage);
+  
+  res.json({
+    success: true,
+    data: result.progress,
+    pointsEarned: result.pointsEarned
+  });
+}));
 
 /**
  * @swagger

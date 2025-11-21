@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { getQuizByTopicId } = require('../db/models/quizzes');
 const { getTopicById } = require('../db/models/topics');
+const { validateTopicId, validateQuizSubmit } = require('../middleware/validators');
+const { quizLimiter } = require('../middleware/rateLimiter');
+const { asyncHandler, AppError } = require('../middleware/errorHandler');
 
 /**
  * @swagger
@@ -91,47 +94,34 @@ const { getTopicById } = require('../db/models/topics');
  *       500:
  *         description: Chyba serveru
  */
-router.get('/:topicId', (req, res) => {
-  try {
-    const topicId = parseInt(req.params.topicId);
-    
-    const topic = getTopicById(topicId);
-    if (!topic) {
-      return res.status(404).json({
-        success: false,
-        error: 'Téma nenalezeno'
-      });
-    }
-    
-    const quiz = getQuizByTopicId(topicId);
-    
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        error: 'Kvíz pro toto téma nebyl nalezen'
-      });
-    }
-    
-    const quizForUser = {
-      ...quiz,
-      questions: quiz.questions.map(q => ({
-        id: q.id,
-        question: q.question,
-        options: q.options
-      }))
-    };
-    
-    res.json({
-      success: true,
-      data: quizForUser
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání kvízu'
-    });
+router.get('/:topicId', validateTopicId, asyncHandler((req, res) => {
+  const topicId = parseInt(req.params.topicId);
+  
+  const topic = getTopicById(topicId);
+  if (!topic) {
+    throw new AppError('Téma nenalezeno', 404);
   }
-});
+  
+  const quiz = getQuizByTopicId(topicId);
+  
+  if (!quiz) {
+    throw new AppError('Kvíz pro toto téma nebyl nalezen', 404);
+  }
+  
+  const quizForUser = {
+    ...quiz,
+    questions: quiz.questions.map(q => ({
+      id: q.id,
+      question: q.question,
+      options: q.options
+    }))
+  };
+  
+  res.json({
+    success: true,
+    data: quizForUser
+  });
+}));
 
 /**
  * @swagger
@@ -206,80 +196,63 @@ router.get('/:topicId', (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.post('/submit', (req, res) => {
-  try {
-    const { topicId, answers } = req.body;
-    
-    if (!topicId || !answers) {
-      return res.status(400).json({
-        success: false,
-        error: 'Chybí topicId nebo odpovědi'
-      });
-    }
-    
-    const quiz = getQuizByTopicId(parseInt(topicId));
-    
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        error: 'Kvíz nenalezen'
-      });
-    }
-    
-    const results = quiz.questions.map((question, index) => {
-      const userAnswer = answers[index];
-      const isCorrect = userAnswer === question.correctAnswer;
-      
-      return {
-        questionId: question.id,
-        question: question.question,
-        userAnswer: userAnswer,
-        correctAnswer: question.correctAnswer,
-        isCorrect: isCorrect,
-        explanation: question.explanation
-      };
-    });
-    
-    const correctCount = results.filter(r => r.isCorrect).length;
-    const totalQuestions = quiz.questions.length;
-    const percentage = Math.round((correctCount / totalQuestions) * 100);
-    
-    let feedback = '';
-    let level = '';
-    
-    if (percentage >= 90) {
-      feedback = 'Výborně! Máš tématu opravdu rozumíš!';
-      level = 'excellent';
-    } else if (percentage >= 70) {
-      feedback = 'Dobrá práce! Pár věcí bys mohl/a ještě zopakovat.';
-      level = 'good';
-    } else if (percentage >= 50) {
-      feedback = 'Není to špatné, ale doporučuji si lekci zopakovat.';
-      level = 'average';
-    } else {
-      feedback = 'Zkus si lekci projít znovu a pak to zkus ještě jednou.';
-      level = 'needs-improvement';
-    }
-    
-    res.json({
-      success: true,
-      data: {
-        results: results,
-        score: {
-          correct: correctCount,
-          total: totalQuestions,
-          percentage: percentage
-        },
-        feedback: feedback,
-        level: level
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při vyhodnocování kvízu'
-    });
+router.post('/submit', quizLimiter, validateQuizSubmit, asyncHandler((req, res) => {
+  const { topicId, answers } = req.body;
+  
+  const quiz = getQuizByTopicId(parseInt(topicId));
+  
+  if (!quiz) {
+    throw new AppError('Kvíz nenalezen', 404);
   }
-});
+  
+  const results = quiz.questions.map((question, index) => {
+    const userAnswer = answers[index];
+    const isCorrect = userAnswer === question.correctAnswer;
+    
+    return {
+      questionId: question.id,
+      question: question.question,
+      userAnswer: userAnswer,
+      correctAnswer: question.correctAnswer,
+      isCorrect: isCorrect,
+      explanation: question.explanation
+    };
+  });
+  
+  const correctCount = results.filter(r => r.isCorrect).length;
+  const totalQuestions = quiz.questions.length;
+  const percentage = Math.round((correctCount / totalQuestions) * 100);
+  
+  let feedback = '';
+  let level = '';
+  
+  if (percentage >= 90) {
+    feedback = 'Výborně! Máš tématu opravdu rozumíš! 🌟';
+    level = 'excellent';
+  } else if (percentage >= 70) {
+    feedback = 'Dobrá práce! Pár věcí bys mohl/a ještě zopakovat. 👍';
+    level = 'good';
+  } else if (percentage >= 50) {
+    feedback = 'Není to špatné, ale doporučuji si lekci zopakovat. 📚';
+    level = 'average';
+  } else {
+    feedback = 'Zkus si lekci projít znovu a pak to zkus ještě jednou. 💪';
+    level = 'needs-improvement';
+  }
+  
+  res.json({
+    success: true,
+    data: {
+      results: results,
+      score: {
+        correct: correctCount,
+        total: totalQuestions,
+        percentage: percentage
+      },
+      feedback: feedback,
+      level: level
+    }
+  });
+}));
 
 module.exports = router;
