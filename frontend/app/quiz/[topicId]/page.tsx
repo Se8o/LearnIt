@@ -60,7 +60,6 @@ export default function QuizPage() {
       const response = await quizApi.submit(topicId, finalAnswers);
       setResults(response.data);
       
-      // Uložit výsledek do pokroku
       await userProgressApi.saveQuizResult(
         topicId,
         response.data.score,
@@ -108,7 +107,6 @@ export default function QuizPage() {
     );
   }
 
-  // Results view
   if (submitted && results) {
     return (
       <div className="container mx-auto px-4 py-16 max-w-4xl">

@@ -37,11 +37,9 @@ export default function LessonPage() {
     
     try {
       await userProgressApi.completeLesson(lesson.topicId, lesson.id);
-      // Přejít na kvíz
       router.push(`/quiz/${lesson.topicId}`);
     } catch (err) {
       console.error('Chyba při ukládání pokroku:', err);
-      // I přes chybu přejít na kvíz
       router.push(`/quiz/${lesson.topicId}`);
     }
   };
@@ -82,11 +80,9 @@ export default function LessonPage() {
         
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <span className="flex items-center gap-1">
-            <span>⏱️</span>
             <span>{lesson.estimatedTime} min</span>
           </span>
           <span className="flex items-center gap-1">
-            <span>📖</span>
             <span>Mikro-lekce</span>
           </span>
         </div>

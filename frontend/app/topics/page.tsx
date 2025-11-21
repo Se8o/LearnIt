@@ -54,7 +54,7 @@ export default function TopicsPage() {
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Vyberte téma 📚
+          Vyberte téma
         </h1>
         <p className="text-xl text-gray-600">
           Začněte s některým z našich připravených témat
@@ -93,7 +93,6 @@ export default function TopicsPage() {
                 {/* Meta Info */}
                 <div className="flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-1 text-gray-500">
-                    <span>⏱️</span>
                     <span>{topic.duration} min</span>
                   </span>
                   <span

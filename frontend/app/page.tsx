@@ -57,18 +57,22 @@ export default function Home() {
         <h2 className="text-3xl font-bold mb-6 text-center">Gamifikace učení</h2>
         <div className="grid md:grid-cols-4 gap-6 text-center">
           <div>
+            <div className="text-4xl mb-2">🌟</div>
             <h4 className="font-semibold mb-2">Body</h4>
             <p className="text-sm opacity-90">Získávejte body za dokončené lekce a kvízy</p>
           </div>
           <div>
+            <div className="text-4xl mb-2">📊</div>
             <h4 className="font-semibold mb-2">Úrovně</h4>
             <p className="text-sm opacity-90">Postupujte na vyšší úrovně</p>
           </div>
           <div>
+            <div className="text-4xl mb-2">🏆</div>
             <h4 className="font-semibold mb-2">Odznaky</h4>
             <p className="text-sm opacity-90">Sbírejte odznaky za úspěchy</p>
           </div>
           <div>
+            <div className="text-4xl mb-2">📈</div>
             <h4 className="font-semibold mb-2">Pokrok</h4>
             <p className="text-sm opacity-90">Sledujte svůj progres</p>
           </div>
