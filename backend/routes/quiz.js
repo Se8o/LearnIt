@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { getQuizByTopicId } = require('../db/models/quizzes');
-const { getTopicById } = require('../db/models/topics');
 const { validateTopicId, validateQuizSubmit } = require('../middleware/validators');
 const { quizLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
@@ -98,15 +97,10 @@ const { successResponse, getQuizFeedback, calculateQuizScore } = require('../uti
 router.get('/:topicId', validateTopicId, asyncHandler((req, res) => {
   const topicId = parseInt(req.params.topicId);
   
-  const topic = getTopicById(topicId);
-  if (!topic) {
-    throw new AppError('Téma nenalezeno', 404);
-  }
-  
   const quiz = getQuizByTopicId(topicId);
   
   if (!quiz) {
-    throw new AppError('Kvíz pro toto téma nebyl nalezen', 404);
+    throw new AppError('Téma nenalezeno', 404);
   }
   
   const quizForUser = {

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { getAllLessons, getLessonByTopicId } = require('../db/models/lessons');
-const { getTopicById } = require('../db/models/topics');
 const { validateTopicId } = require('../middleware/validators');
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
 
@@ -80,15 +79,10 @@ const { asyncHandler, AppError } = require('../middleware/errorHandler');
 router.get('/:topicId', validateTopicId, asyncHandler((req, res) => {
   const topicId = parseInt(req.params.topicId);
   
-  const topic = getTopicById(topicId);
-  if (!topic) {
-    throw new AppError('Téma nenalezeno', 404);
-  }
-  
   const lesson = getLessonByTopicId(topicId);
   
   if (!lesson) {
-    throw new AppError('Lekce pro toto téma nebyla nalezena', 404);
+    throw new AppError('Téma nenalezeno', 404);
   }
   
   res.json({
