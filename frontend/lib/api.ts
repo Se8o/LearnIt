@@ -1,5 +1,9 @@
 import axios from 'axios';
 
+/**
+ * SECURITY NOTE: localStorage token storage has XSS vulnerability
+ * See AuthContext.tsx for planned migration to HttpOnly cookies
+ */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const api = axios.create({

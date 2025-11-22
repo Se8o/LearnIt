@@ -8,11 +8,20 @@ const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   
   if (!errors.isEmpty()) {
-    const errorMessages = errors.array().map(err => ({
-      field: err.path,
-      message: err.msg,
-      value: err.value
-    }));
+    const errorMessages = errors.array().map(err => {
+      const errorObj = {
+        field: err.path,
+        message: err.msg
+      };
+      
+      // SECURITY: Nikdy nevracet plaintext hodnoty citlivých polí (hesla)
+      // Pro ostatní pole můžeme zobrazit hodnotu pro lepší UX
+      if (!['password', 'passwordHash', 'token', 'refreshToken'].includes(err.path)) {
+        errorObj.value = err.value;
+      }
+      
+      return errorObj;
+    });
     
     throw new AppError(
       'Validace vstupních dat selhala',
@@ -37,12 +46,23 @@ const validateRegister = [
     .withMessage('Email je příliš dlouhý'),
   
   body('password')
-    .isLength({ min: 6 })
-    .withMessage('Heslo musí mít alespoň 6 znaků')
+    .isLength({ min: 8 })
+    .withMessage('Heslo musí mít alespoň 8 znaků')
     .isLength({ max: 128 })
     .withMessage('Heslo je příliš dlouhé')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Heslo musí obsahovat malé písmeno, velké písmeno a číslo'),
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+    .withMessage('Heslo musí obsahovat malé písmeno, velké písmeno, číslo a speciální znak (@$!%*?&)'),
+  
+  body('password')
+    .custom((value) => {
+      // Dodatečná kontrola pro běžné slabé hesla (pouze pokud jsou identická)
+      const commonPasswords = ['password', '12345678', 'qwerty123', 'password123', 'admin123'];
+      const lowerValue = value.toLowerCase();
+      if (commonPasswords.includes(lowerValue)) {
+        throw new Error('Heslo je příliš běžné a snadno uhádnutelné');
+      }
+      return true;
+    }),
   
   body('name')
     .trim()

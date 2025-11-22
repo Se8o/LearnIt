@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { createUser, getUserByEmail, getUserById, validatePassword, updateUser } = require('../db/models/users');
-const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const { AppError, asyncHandler } = require('../middleware/errorHandler');
 const { validateRegister, validateLogin, validateUpdateProfile } = require('../middleware/validators');
 const { authLimiter, registerLimiter } = require('../middleware/rateLimiter');
 const { logger } = require('../config/logger');
 const { config } = require('../config/env');
+
+const JWT_SECRET = config.jwt.secret;
 const { 
   createRefreshToken, 
   verifyRefreshToken, 

@@ -213,12 +213,17 @@ npm test -- __tests__/integration/
 - ✅ JWT access tokens (15min expiry)
 - ✅ Refresh tokens (7 days, revokable)
 - ✅ Bcrypt password hashing (10 rounds)
+- ✅ **Helmet** - Security HTTP headers (XSS, clickjacking protection)
+- ✅ **Input sanitization** - XSS-clean & NoSQL injection protection
 - ✅ Rate limiting (anti brute-force)
 - ✅ Input validation (express-validator)
+- ✅ **Strong password policy** - Min 8 chars, uppercase, lowercase, numbers, special chars
+- ✅ **Sensitive data protection** - Passwords never returned in error responses
 - ✅ CORS configured
-- ✅ Helmet security headers
 - ✅ Error handling middleware
 - ✅ SQL injection prevention (prepared statements)
+- ✅ **Automatic token cleanup** - Expired refresh tokens removed periodically
+- ⚠️ **TODO**: Migrate to HttpOnly cookies (currently localStorage - XSS risk)
 
 ## 📚 Dokumentace
 

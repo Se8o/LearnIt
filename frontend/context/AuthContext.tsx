@@ -3,6 +3,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi, User } from '@/lib/api';
 
+/**
+ * SECURITY WARNING: Storing tokens in localStorage is vulnerable to XSS attacks
+ * 
+ * TODO (Future Security Enhancement):
+ * - Migrate to HttpOnly cookies for refresh tokens
+ * - Keep only access token in memory (not localStorage)
+ * - Implement CSRF protection when using cookies
+ * - See: https://auth0.com/docs/secure/security-guidance/data-security/token-storage
+ * 
+ * Current implementation acceptable for MVP but should be addressed before production.
+ */
+
 interface AuthContextType {
   user: User | null;
   token: string | null;

@@ -18,7 +18,7 @@ describe('User Model', () => {
     test('should create user with hashed password', async () => {
       const userData = {
         email: 'test@example.com',
-        password: 'password123',
+        password: 'Password123!',
         name: 'Test User'
       };
 
@@ -96,7 +96,7 @@ describe('User Model', () => {
 
   describe('verifyPassword', () => {
     test('should verify correct password', async () => {
-      const password = 'password123';
+      const password = 'Password123!';
       await createUser('test@example.com', password, 'Test User');
       const user = getUserByEmail('test@example.com');
 

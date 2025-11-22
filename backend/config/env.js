@@ -2,6 +2,8 @@
  * Environment variables configuration a validace
  */
 
+// NOTE: Logger se importuje až po načtení .env, takže při validaci musíme použít console
+// Pro runtime warnings používáme logger (viz níže)
 const requiredEnvVars = [
   'JWT_SECRET',
   'JWT_REFRESH_SECRET'
@@ -37,6 +39,8 @@ const validateEnv = () => {
   });
   
   // Validace formátů
+  // NOTE: Používáme console zde, protože logger ještě není inicializován
+  // Pro production warnings viz getConfigWarnings() níže
   if (process.env.JWT_SECRET.length < 32) {
     console.warn('⚠️  Warning: JWT_SECRET should be at least 32 characters long');
   }
@@ -49,6 +53,23 @@ const validateEnv = () => {
   if (!validNodeEnvs.includes(process.env.NODE_ENV)) {
     console.warn(`⚠️  Warning: NODE_ENV should be one of: ${validNodeEnvs.join(', ')}`);
   }
+};
+
+/**
+ * Vrátí pole warnings pro runtime logging
+ */
+const getConfigWarnings = () => {
+  const warnings = [];
+  
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+    warnings.push('JWT_SECRET should be at least 32 characters long');
+  }
+  
+  if (process.env.JWT_REFRESH_SECRET && process.env.JWT_REFRESH_SECRET.length < 32) {
+    warnings.push('JWT_REFRESH_SECRET should be at least 32 characters long');
+  }
+  
+  return warnings;
 };
 
 /**
@@ -82,5 +103,6 @@ const config = {
 
 module.exports = {
   validateEnv,
-  config
+  config,
+  getConfigWarnings
 };

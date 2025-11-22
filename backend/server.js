@@ -1,11 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 const { seedDatabase } = require('./db/seed');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { generalLimiter } = require('./middleware/rateLimiter');
+const { deleteExpiredTokens } = require('./db/models/refreshTokens');
 
 // Load environment variables FIRST
 dotenv.config();
@@ -24,26 +28,53 @@ try {
 
 seedDatabase();
 
+// Cleanup expired refresh tokens on startup
+deleteExpiredTokens();
+logger.info('Expired refresh tokens cleaned up');
+
+// Setup periodic cleanup (every 24 hours)
+setInterval(() => {
+  const result = deleteExpiredTokens();
+  logger.info('Periodic cleanup of expired tokens', { deleted: result.changes });
+}, 24 * 60 * 60 * 1000);
+
 const app = express();
 
-// Security middleware
+// Security middleware - správné pořadí je kritické!
 app.set('trust proxy', 1); // Pro správné IP adresy za reverse proxy
 
-// CORS konfigurace
+// 1. Helmet - Security HTTP headers (XSS, clickjacking, etc.)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Pro Swagger UI
+}));
+
+// 2. CORS konfigurace
 app.use(cors({
   origin: config.cors.origin,
   credentials: true
 }));
 
-// Body parsing
+// 3. Rate limiting - před parsing pro ochranu před DoS
+app.use('/api', generalLimiter);
+
+// 4. Body parsing - po rate limitingu
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// 5. Data sanitization proti NoSQL injection a XSS
+app.use(mongoSanitize()); // Odstraní $ a . z user input
+app.use(xss()); // Sanitizuje user input proti XSS
+
 // HTTP request logging
 app.use(httpLogger);
-
-// Rate limiting - aplikuj na všechny API routes
-app.use('/api', generalLimiter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }',

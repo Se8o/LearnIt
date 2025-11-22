@@ -29,7 +29,7 @@ describe('Auth API Integration Tests', () => {
     test('should register new user successfully', async () => {
       const userData = {
         email: 'test@example.com',
-        password: 'Password123',
+        password: 'Password123!',
         name: 'Test User'
       };
 
@@ -55,7 +55,7 @@ describe('Auth API Integration Tests', () => {
     test('should reject duplicate email', async () => {
       const userData = {
         email: 'test@example.com',
-        password: 'Password123',
+        password: 'Password123!',
         name: 'Test User'
       };
 
@@ -77,7 +77,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/register')
         .send({
           email: 'invalid-email',
-          password: 'Password123',
+          password: 'Password123!',
           name: 'Test User'
         })
         .expect(400);
@@ -104,7 +104,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/register')
         .send({
           email: 'test@example.com',
-          password: 'Password123',
+          password: 'Password123!',
           name: 'A'
         })
         .expect(400);
@@ -116,7 +116,7 @@ describe('Auth API Integration Tests', () => {
   describe('POST /api/auth/login', () => {
     const userData = {
       email: 'test@example.com',
-      password: 'Password123',
+      password: 'Password123!',
       name: 'Test User'
     };
 
@@ -158,7 +158,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/login')
         .send({
           email: 'nonexistent@example.com',
-          password: 'Password123'
+          password: 'Password123!'
         })
         .expect(401);
 
@@ -170,7 +170,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/login')
         .send({
           email: 'invalid-email',
-          password: 'Password123'
+          password: 'Password123!'
         })
         .expect(400);
 
@@ -186,7 +186,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/register')
         .send({
           email: 'test@example.com',
-          password: 'Password123',
+          password: 'Password123!',
           name: 'Test User'
         });
       
@@ -231,7 +231,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/register')
         .send({
           email: 'test@example.com',
-          password: 'Password123',
+          password: 'Password123!',
           name: 'Test User'
         });
       
@@ -274,7 +274,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/register')
         .send({
           email: 'test@example.com',
-          password: 'Password123',
+          password: 'Password123!',
           name: 'Test User'
         });
       
@@ -286,7 +286,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'Password123'
+          password: 'Password123!'
         });
       
       refreshToken2 = response2.body.refreshToken;
@@ -333,7 +333,7 @@ describe('Auth API Integration Tests', () => {
     let accessToken;
     const userData = {
       email: 'test@example.com',
-      password: 'Password123',
+      password: 'Password123!',
       name: 'Test User'
     };
 

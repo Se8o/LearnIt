@@ -42,4 +42,4 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticateToken, optionalAuth, JWT_SECRET };
+module.exports = { authenticateToken, optionalAuth };
