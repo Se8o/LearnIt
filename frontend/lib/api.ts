@@ -6,61 +6,17 @@ import axios from 'axios';
  */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+/**
+ * Axios instance for API calls
+ * Note: Refresh token logic is handled in AuthContext, not here
+ * This eliminates race conditions and centralizes auth state management
+ */
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
-// Axios interceptor pro automatické obnovení tokenu
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // Pokud je 401 a ještě jsme nezkusili refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          // Nemáme refresh token, přesměrujeme na login
-          localStorage.removeItem('accessToken');
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
-          return Promise.reject(error);
-        }
-
-        // Zkusíme získat nový access token
-        const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-          refreshToken,
-        });
-
-        const { accessToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
-
-        // Aktualizujeme Authorization header pro původní request
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-
-        // Zopakujeme původní request s novým tokenem
-        return api(originalRequest);
-      } catch (refreshError) {
-        // Refresh selhal, vymažeme tokeny a přesměrujeme na login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
 
 // Types
 export interface Topic {
