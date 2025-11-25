@@ -1,5 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
 const { AppError } = require('./errorHandler');
+const { VALIDATION } = require('../config/constants');
 
 /**
  * Middleware pro zpracování výsledků validace
@@ -42,13 +43,13 @@ const validateRegister = [
     .isEmail()
     .withMessage('Neplatná emailová adresa')
     .normalizeEmail()
-    .isLength({ max: 255 })
+    .isLength({ max: VALIDATION.EMAIL.MAX_LENGTH })
     .withMessage('Email je příliš dlouhý'),
   
   body('password')
-    .isLength({ min: 8 })
+    .isLength({ min: VALIDATION.PASSWORD.MIN_LENGTH })
     .withMessage('Heslo musí mít alespoň 8 znaků')
-    .isLength({ max: 128 })
+    .isLength({ max: VALIDATION.PASSWORD.MAX_LENGTH })
     .withMessage('Heslo je příliš dlouhé')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
     .withMessage('Heslo musí obsahovat malé písmeno, velké písmeno, číslo a speciální znak (@$!%*?&)'),
@@ -56,9 +57,8 @@ const validateRegister = [
   body('password')
     .custom((value) => {
       // Dodatečná kontrola pro běžné slabé hesla (pouze pokud jsou identická)
-      const commonPasswords = ['password', '12345678', 'qwerty123', 'password123', 'admin123'];
       const lowerValue = value.toLowerCase();
-      if (commonPasswords.includes(lowerValue)) {
+      if (VALIDATION.PASSWORD.COMMON_PASSWORDS.includes(lowerValue)) {
         throw new Error('Heslo je příliš běžné a snadno uhádnutelné');
       }
       return true;
@@ -68,7 +68,7 @@ const validateRegister = [
     .trim()
     .notEmpty()
     .withMessage('Jméno je povinné')
-    .isLength({ min: 2, max: 100 })
+    .isLength({ min: VALIDATION.NAME.MIN_LENGTH, max: VALIDATION.NAME.MAX_LENGTH })
     .withMessage('Jméno musí mít 2-100 znaků')
     .matches(/^[a-zA-ZáčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ\s]+$/)
     .withMessage('Jméno může obsahovat pouze písmena'),

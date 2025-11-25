@@ -14,7 +14,7 @@ const createRefreshToken = (userId) => {
   // Vypočítat expiraci
   const expiresAt = new Date();
   const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '7d';
-  const expiryDays = parseInt(refreshTokenExpiry.replace('d', '')) || 7;
+  const expiryDays = parseInt(refreshTokenExpiry.replace('d', '')) || TOKENS.REFRESH_TOKEN_DEFAULT_EXPIRY_DAYS;
   expiresAt.setDate(expiresAt.getDate() + expiryDays);
   
   // Uložit do databáze

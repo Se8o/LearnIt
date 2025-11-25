@@ -142,7 +142,7 @@ const saveQuizResult = (userId = 'default', topicId, score, percentage) => {
   const points = Math.round(percentage / 10);
   
   // Update perfect quiz streak
-  if (percentage === 100) {
+  if (percentage === GAMIFICATION.PERFECT_SCORE) {
     db.prepare(`
       UPDATE user_stats 
       SET total_points = total_points + ?, perfect_quiz_streak = perfect_quiz_streak + 1
@@ -170,7 +170,7 @@ const updateLevel = (userId) => {
   userId = String(userId);
   const db = getDb();
   const stats = db.prepare('SELECT total_points FROM user_stats WHERE user_id = ?').get(userId);
-  const newLevel = Math.floor(stats.total_points / 100) + 1;
+  const newLevel = Math.floor(stats.total_points / GAMIFICATION.POINTS_PER_LEVEL) + 1;
   
   db.prepare(`
     UPDATE user_stats 
@@ -187,7 +187,7 @@ const updateBadges = (userId, percentage = null) => {
   let newBadges = false;
   
   // Perfect Score - 100% v kvízu
-  if (percentage === 100 && !badges.includes('perfect-score')) {
+  if (percentage === GAMIFICATION.PERFECT_SCORE && !badges.includes('perfect-score')) {
     badges.push('perfect-score');
     newBadges = true;
   }
@@ -209,15 +209,15 @@ const updateBadges = (userId, percentage = null) => {
   }
   
   // Week Warrior - 7 dní v řadě
-  if (stats.current_streak >= 7 && !badges.includes('week-warrior')) {
+  if (stats.current_streak >= GAMIFICATION.STREAK.WEEK_WARRIOR_DAYS && !badges.includes('week-warrior')) {
     badges.push('week-warrior');
     newBadges = true;
   }
   
   // Quiz Master - 10 perfektních kvízů (celkem)
   const perfectQuizCount = db.prepare(`
-    SELECT COUNT(*) as count FROM quiz_results WHERE user_id = ? AND percentage = 100
-  `).get(userId).count;
+    SELECT COUNT(*) as count FROM quiz_results WHERE user_id = ? AND percentage = ?
+  `).get(userId, GAMIFICATION.PERFECT_SCORE).count;
   
   if (perfectQuizCount >= 10 && !badges.includes('quiz-master')) {
     badges.push('quiz-master');
