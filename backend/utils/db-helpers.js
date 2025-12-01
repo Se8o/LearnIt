@@ -10,7 +10,7 @@
  * @returns {Object} Mapped object with camelCase properties
  */
 const mapDbRow = (row, mapping = {}) => {
-  if (!row) return null;
+  if (!row) return undefined;
   
   const defaultMapping = {
     topic_id: 'topicId',

@@ -1,6 +1,8 @@
 const { getDb } = require('../setup');
 const crypto = require('crypto');
 const { config } = require('../../config/env');
+const { TOKENS } = require('../../config/constants');
+const { mapDbRow } = require('../../utils/db-helpers');
 
 /**
  * Vytvoření refresh tokenu pro uživatele
@@ -112,12 +114,14 @@ const getUserActiveTokens = (userId) => {
   const db = getDb();
   const now = new Date().toISOString();
   
-  return db.prepare(`
+  const tokens = db.prepare(`
     SELECT id, created_at, expires_at 
     FROM refresh_tokens 
     WHERE user_id = ? AND revoked = 0 AND expires_at > ?
     ORDER BY created_at DESC
   `).all(userId, now);
+  
+  return tokens.map(mapDbRow);
 };
 
 module.exports = {

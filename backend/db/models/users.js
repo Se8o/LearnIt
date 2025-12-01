@@ -1,6 +1,7 @@
 const { getDb } = require('../setup');
 const bcrypt = require('bcryptjs');
 const { AppError } = require('../../middleware/errorHandler');
+const { mapDbRow } = require('../../utils/db-helpers');
 
 const createUser = async (email, password, name) => {
   if (!email || !password || !name) {
@@ -40,20 +41,22 @@ const createUser = async (email, password, name) => {
 
 const getUserByEmail = (email) => {
   const db = getDb();
-  return db.prepare(`
-    SELECT id, email, password_hash as passwordHash, name, created_at as createdAt
+  const user = db.prepare(`
+    SELECT id, email, password_hash, name, created_at
     FROM users 
     WHERE LOWER(email) = LOWER(?)
   `).get(email);
+  return mapDbRow(user);
 };
 
 const getUserById = (id) => {
   const db = getDb();
-  return db.prepare(`
-    SELECT id, email, name, created_at as createdAt
+  const user = db.prepare(`
+    SELECT id, email, name, created_at
     FROM users 
     WHERE id = ?
   `).get(id);
+  return mapDbRow(user);
 };
 
 const validatePassword = async (password, hash) => {
