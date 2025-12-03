@@ -75,7 +75,11 @@ const createTables = () => {
       user_id TEXT NOT NULL DEFAULT 'default' UNIQUE,
       total_points INTEGER NOT NULL DEFAULT 0,
       level INTEGER NOT NULL DEFAULT 1,
-      badges TEXT NOT NULL DEFAULT '[]'
+      badges TEXT NOT NULL DEFAULT '[]',
+      current_streak INTEGER NOT NULL DEFAULT 0,
+      longest_streak INTEGER NOT NULL DEFAULT 0,
+      last_activity_date TEXT,
+      perfect_quiz_streak INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS users (

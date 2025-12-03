@@ -10,7 +10,10 @@ LearnIt je interaktivní vzdělávací platforma, která propojuje krátké lekc
 
 - ✅ **Mikro-lekce** - Max 5 minut, ideální pro „scroll & learn"
 - ✅ **Multimediální obsah** - Text (Markdown) + YouTube videa + kvízy
-- ✅ **Gamifikace** - Body, odznaky, úrovně, sledování pokroku
+- ✅ **Rozšířená gamifikace** - Body, 7 typů odznaků, úrovně, daily streaks, sledování pokroku
+- ✅ **🔥 Daily Streaks** - Denní série učení s bonus body (až 20 bodů za streak)
+- ✅ **🔍 Vyhledávání & Filtry** - Full-text search, filtry podle kategorie a obtížnosti, sorting
+- ✅ **🌙 Dark Mode** - Přepínání mezi světlým a tmavým režimem
 - ✅ **Autentizace** - JWT tokens, refresh tokens, bezpečné přihlášení
 - ✅ **RESTful API** - Swagger dokumentace, validace, rate limiting
 - ✅ **Moderní frontend** - Next.js 15, React 19, TypeScript, Tailwind CSS
@@ -162,13 +165,24 @@ Každé téma obsahuje:
 ### Bodový systém
 - Dokončená lekce: **10 bodů**
 - Kvíz: **1-10 bodů** (podle výsledku)
+- **Daily Streak Bonus**: **2-20 bodů** (podle délky série)
 - Každých **100 bodů** = **nová úroveň**
 
-### Odznaky
+### 🏆 Odznaky (7 typů)
 - 🌟 **Perfect Score** - 100% v kvízu
 - 📚 **Beginner** - 3 dokončené lekce
-- 🎓 **Advanced Learner** - 10 dokončených lekcí
-- 🏆 **Quiz Master** - 5 perfektních kvízů
+- 📖 **Bookworm** - 20 dokončených lekcí
+- 🔥 **Week Warrior** - 7 dní učení v řadě
+- 🏆 **Quiz Master** - 10 perfektních kvízů
+- ⭐ **Perfectionist** - 5 perfektních kvízů v řadě
+- 🎓 **All Topics** - Lekce ze všech kategorií
+
+### 📊 Statistiky
+- **Current Streak** - Aktuální denní série
+- **Longest Streak** - Nejdelší zaznamenaná série
+- **Perfect Quiz Streak** - Série perfektních kvízů za sebou
+- **Total Points** - Celkový počet bodů
+- **Level Progress** - Pokrok do dalšího levelu
 
 ## 🧪 Testování
 

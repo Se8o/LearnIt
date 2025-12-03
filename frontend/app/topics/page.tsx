@@ -6,14 +6,20 @@ import { topicsApi, Topic } from '@/lib/api';
 
 export default function TopicsPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
+  const [filteredTopics, setFilteredTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('default');
 
   useEffect(() => {
     const fetchTopics = async () => {
       try {
         const response = await topicsApi.getAll();
         setTopics(response.data);
+        setFilteredTopics(response.data);
       } catch (err) {
         setError('Nepodařilo se načíst témata. Zkontrolujte, zda backend běží.');
         console.error(err);
@@ -24,6 +30,57 @@ export default function TopicsPage() {
 
     fetchTopics();
   }, []);
+
+  // Filter and search logic
+  useEffect(() => {
+    let result = [...topics];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (topic) =>
+          topic.title.toLowerCase().includes(query) ||
+          topic.description.toLowerCase().includes(query) ||
+          topic.category.toLowerCase().includes(query)
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== 'all') {
+      result = result.filter((topic) => topic.category === selectedCategory);
+    }
+
+    // Difficulty filter
+    if (selectedDifficulty !== 'all') {
+      result = result.filter((topic) => topic.difficulty === selectedDifficulty);
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case 'duration-asc':
+        result.sort((a, b) => a.duration - b.duration);
+        break;
+      case 'duration-desc':
+        result.sort((a, b) => b.duration - a.duration);
+        break;
+      case 'title':
+        result.sort((a, b) => a.title.localeCompare(b.title, 'cs'));
+        break;
+      case 'difficulty':
+        const difficultyOrder = { beginner: 1, intermediate: 2, advanced: 3 };
+        result.sort((a, b) => difficultyOrder[a.difficulty as keyof typeof difficultyOrder] - difficultyOrder[b.difficulty as keyof typeof difficultyOrder]);
+        break;
+      default:
+        // Keep original order
+        break;
+    }
+
+    setFilteredTopics(result);
+  }, [topics, searchQuery, selectedCategory, selectedDifficulty, sortBy]);
+
+  // Get unique categories
+  const categories = Array.from(new Set(topics.map((t) => t.category)));
 
   if (loading) {
     return (
@@ -61,8 +118,90 @@ export default function TopicsPage() {
         </p>
       </div>
 
+      {/* Search and Filters */}
+      <div className="max-w-6xl mx-auto mb-8">
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="🔍 Hledat témata..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-6 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none text-lg transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Filters Row */}
+        <div className="flex flex-wrap gap-4 items-center justify-between bg-white rounded-xl p-4 shadow-md">
+          <div className="flex flex-wrap gap-4 items-center">
+            {/* Category Filter */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Kategorie</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none bg-white"
+              >
+                <option value="all">Všechny</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Difficulty Filter */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Obtížnost</label>
+              <select
+                value={selectedDifficulty}
+                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none bg-white"
+              >
+                <option value="all">Všechny</option>
+                <option value="beginner">Začátečník</option>
+                <option value="intermediate">Středně pokročilý</option>
+                <option value="advanced">Pokročilý</option>
+              </select>
+            </div>
+
+            {/* Sort By */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Seřadit podle</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none bg-white"
+              >
+                <option value="default">Výchozí</option>
+                <option value="title">Název (A-Z)</option>
+                <option value="duration-asc">Délka (nejkratší)</option>
+                <option value="duration-desc">Délka (nejdelší)</option>
+                <option value="difficulty">Obtížnost</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Results count */}
+          <div className="text-sm text-gray-600">
+            Zobrazeno <span className="font-bold text-blue-600">{filteredTopics.length}</span> z {topics.length} témat
+          </div>
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {topics.map((topic) => (
+        {filteredTopics.map((topic) => (
           <Link
             key={topic.id}
             href={`/lesson/${topic.id}`}
@@ -120,9 +259,22 @@ export default function TopicsPage() {
         ))}
       </div>
 
-      {topics.length === 0 && !loading && (
-        <div className="text-center text-gray-500 mt-12">
-          <p>Zatím nejsou k dispozici žádná témata.</p>
+      {filteredTopics.length === 0 && !loading && (
+        <div className="text-center text-gray-500 mt-12 bg-gray-50 rounded-xl p-12">
+          <div className="text-6xl mb-4">🔍</div>
+          <p className="text-xl font-semibold mb-2">Žádná témata nenalezena</p>
+          <p className="text-gray-400">Zkuste změnit vyhledávací kritéria nebo filtry</p>
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedCategory('all');
+              setSelectedDifficulty('all');
+              setSortBy('default');
+            }}
+            className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Zrušit všechny filtry
+          </button>
         </div>
       )}
     </div>

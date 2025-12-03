@@ -3,15 +3,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function Navigation() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center gap-2">
@@ -25,8 +27,8 @@ export default function Navigation() {
               href="/"
               className={`font-medium transition-colors ${
                 isActive('/')
-                  ? 'text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
               }`}
             >
               Domů
@@ -35,8 +37,8 @@ export default function Navigation() {
               href="/topics"
               className={`font-medium transition-colors ${
                 isActive('/topics')
-                  ? 'text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
               }`}
             >
               Témata
@@ -45,30 +47,40 @@ export default function Navigation() {
               href="/progress"
               className={`font-medium transition-colors ${
                 isActive('/progress')
-                  ? 'text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
               }`}
             >
               Můj pokrok
             </Link>
+            
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xl"
+              aria-label="Toggle theme"
+              title={theme === 'light' ? 'Přepnout na tmavý režim' : 'Přepnout na světlý režim'}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
 
             {user ? (
-              <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-300">
-                <span className="text-sm text-gray-700">
+              <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-300 dark:border-gray-600">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
                   Ahoj, <span className="font-semibold">{user.name}</span>
                 </span>
                 <button
                   onClick={logout}
-                  className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+                  className="text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                 >
                   Odhlásit se
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-300">
+              <div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-300 dark:border-gray-600">
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                  className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   Přihlásit se
                 </Link>

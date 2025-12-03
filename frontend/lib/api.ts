@@ -133,6 +133,10 @@ export interface UserProgress {
   totalPoints: number;
   level: number;
   badges: string[];
+  currentStreak: number;
+  longestStreak: number;
+  lastActivityDate: string | null;
+  perfectQuizStreak: number;
 }
 
 export interface User {

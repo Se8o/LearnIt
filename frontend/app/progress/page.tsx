@@ -53,13 +53,38 @@ export default function ProgressPage() {
     const badges: Record<string, { name: string; icon: string; description: string }> = {
       'perfect-score': {
         name: 'Perfektní skóre',
-        icon: '',
+        icon: '🌟',
         description: '100% úspěšnost v kvízu',
       },
       'beginner': {
         name: 'Začátečník',
-        icon: '',
+        icon: '📚',
         description: '3 dokončené lekce',
+      },
+      'bookworm': {
+        name: 'Knižní mol',
+        icon: '📖',
+        description: '20 dokončených lekcí',
+      },
+      'week-warrior': {
+        name: 'Týdení bojovník',
+        icon: '🔥',
+        description: '7 dní učení v řadě',
+      },
+      'quiz-master': {
+        name: 'Kvízový mistr',
+        icon: '🏆',
+        description: '10 perfektních kvízů',
+      },
+      'perfectionist': {
+        name: 'Perfekcionista',
+        icon: '⭐',
+        description: '5 perfektních kvízů v řadě',
+      },
+      'all-topics': {
+        name: 'Univerální znalec',
+        icon: '🎓',
+        description: 'Lekce ze všech kategorií',
       },
     };
     return badges[badge] || { name: badge, icon: '', description: '' };
@@ -94,7 +119,7 @@ export default function ProgressPage() {
       </h1>
 
       {/* Stats Overview */}
-      <div className="grid md:grid-cols-4 gap-6 mb-12">
+      <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
           <div className="text-3xl font-bold mb-1">{progress.totalPoints}</div>
           <div className="text-sm opacity-90">Celkové body</div>
@@ -113,6 +138,16 @@ export default function ProgressPage() {
         <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-6 shadow-lg">
           <div className="text-3xl font-bold mb-1">{progress.badges.length}</div>
           <div className="text-sm opacity-90">Odznaky</div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl p-6 shadow-lg">
+          <div className="text-3xl font-bold mb-1">🔥 {progress.currentStreak}</div>
+          <div className="text-sm opacity-90">Aktuální série</div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl p-6 shadow-lg">
+          <div className="text-3xl font-bold mb-1">🏆 {progress.longestStreak}</div>
+          <div className="text-sm opacity-90">Nejdelší série</div>
         </div>
       </div>
 
