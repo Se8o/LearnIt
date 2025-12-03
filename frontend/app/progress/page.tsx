@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { userProgressApi, topicsApi, UserProgress, Topic } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export default function ProgressPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -101,25 +103,11 @@ export default function ProgressPage() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Načítám pokrok...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Načítám pokrok..." />;
   }
 
   if (error || !progress) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
-          <h2 className="text-red-800 font-semibold mb-2">Chyba načítání</h2>
-          <p className="text-red-600">{error || 'Pokrok nenalezen'}</p>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error || 'Pokrok nenalezen'} />;
   }
 
   return (

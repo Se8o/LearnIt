@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { quizApi, userProgressApi, Quiz, QuizResult } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export default function QuizPage() {
   const params = useParams();
@@ -89,25 +91,11 @@ export default function QuizPage() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Načítám kvíz...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Načítám kvíz..." />;
   }
 
   if (error || !quiz) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
-          <h2 className="text-red-800 font-semibold mb-2">Chyba načítání</h2>
-          <p className="text-red-600">{error || 'Kvíz nenalezen'}</p>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error || 'Kvíz nenalezen'} />;
   }
 
   if (submitted && results) {

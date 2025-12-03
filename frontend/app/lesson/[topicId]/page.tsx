@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { lessonsApi, userProgressApi, Lesson } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export default function LessonPage() {
   const params = useParams();
@@ -47,25 +49,11 @@ export default function LessonPage() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Načítám lekci...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Načítám lekci..." />;
   }
 
   if (error || !lesson) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
-          <h2 className="text-red-800 font-semibold mb-2">Chyba načítání</h2>
-          <p className="text-red-600">{error || 'Lekce nenalezena'}</p>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error || 'Lekce nenalezena'} />;
   }
 
   return (

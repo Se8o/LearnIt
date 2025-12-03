@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { topicsApi, Topic } from '@/lib/api';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export default function TopicsPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -83,28 +85,11 @@ export default function TopicsPage() {
   const categories = Array.from(new Set(topics.map((t) => t.category)));
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Načítám témata...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Načítám témata..." />;
   }
 
   if (error) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
-          <h2 className="text-red-800 font-semibold mb-2">Chyba načítání</h2>
-          <p className="text-red-600">{error}</p>
-          <p className="text-sm text-red-500 mt-2">
-            Ujistěte se, že backend běží na http://localhost:3001
-          </p>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error} showBackendHint={true} />;
   }
 
   return (
