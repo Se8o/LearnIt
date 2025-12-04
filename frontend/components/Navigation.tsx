@@ -8,7 +8,7 @@ import { useTheme } from '@/context/ThemeContext';
 export default function Navigation() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, mounted } = useTheme();
 
   const isActive = (path: string) => pathname === path;
 
@@ -55,14 +55,16 @@ export default function Navigation() {
             </Link>
             
             {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xl"
-              aria-label="Toggle theme"
-              title={theme === 'light' ? 'Přepnout na tmavý režim' : 'Přepnout na světlý režim'}
-            >
-              {theme === 'light' ? '🌙' : '☀️'}
-            </button>
+            {mounted && (
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xl"
+                aria-label="Toggle theme"
+                title={theme === 'light' ? 'Přepnout na tmavý režim' : 'Přepnout na světlý režim'}
+              >
+                {theme === 'light' ? '🌙' : '☀️'}
+              </button>
+            )}
 
             {user ? (
               <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-300 dark:border-gray-600">

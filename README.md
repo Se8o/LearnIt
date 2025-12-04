@@ -45,7 +45,29 @@ LearnIt/
 
 ## 🚀 Rychlý start
 
-### Prerekvizity
+### Možnost 1: Docker (Doporučeno) 🐳
+
+```bash
+# 1. Nainstalujte Docker Desktop
+# https://www.docker.com/products/docker-desktop
+
+# 2. Spusťte aplikaci
+docker compose up -d
+
+# 3. Aplikace běží na:
+# Frontend: http://localhost:3000
+# Backend: http://localhost:3001
+# API Docs: http://localhost:3001/api-docs
+
+# Zastavení
+docker compose down
+```
+
+📖 Více v [DOCKER.md](./DOCKER.md)
+
+### Možnost 2: Manuální instalace
+
+#### Prerekvizity
 - Node.js 18+ a npm
 - Git
 

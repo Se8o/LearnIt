@@ -10,17 +10,26 @@ export default function ProgressPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuth();
+  const { token, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) return;
+    
+    if (!token) {
+      setError('Musíte být přihlášeni.');
+      setLoading(false);
+      return;
+    }
+    
     const fetchData = async () => {
       try {
         const [progressResponse, topicsResponse] = await Promise.all([
-          userProgressApi.get(token || undefined),
+          userProgressApi.get(token),
           topicsApi.getAll(),
         ]);
         setProgress(progressResponse.data);
         setTopics(topicsResponse.data);
+        setError(null);
       } catch (err) {
         setError('Nepodařilo se načíst pokrok.');
         console.error(err);
@@ -30,13 +39,14 @@ export default function ProgressPage() {
     };
 
     fetchData();
-  }, [token]);
+  }, [token, authLoading]);
 
   const handleReset = async () => {
     if (!confirm('Opravdu chcete resetovat veškerý pokrok?')) return;
+    if (!token) return;
     
     try {
-      const response = await userProgressApi.reset(token || undefined);
+      const response = await userProgressApi.reset(token);
       setProgress(response.data);
     } catch (err) {
       console.error('Chyba při resetování:', err);

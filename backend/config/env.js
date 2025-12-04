@@ -76,14 +76,14 @@ const getConfigWarnings = () => {
  * Export konfigurační objekt
  */
 const config = {
-  port: parseInt(process.env.PORT, 10),
-  nodeEnv: process.env.NODE_ENV,
+  port: parseInt(process.env.PORT || '3001', 10),
+  nodeEnv: process.env.NODE_ENV || 'development',
   
   jwt: {
     secret: process.env.JWT_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
-    accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY,
-    refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY
+    accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY || '15m',
+    refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || '7d'
   },
   
   cors: {
@@ -91,7 +91,7 @@ const config = {
   },
   
   logging: {
-    level: process.env.LOG_LEVEL
+    level: process.env.LOG_LEVEL || 'info'
   },
   
   security: {

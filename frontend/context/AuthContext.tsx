@@ -31,8 +31,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     // Načíst oba tokeny z localStorage
     const storedToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
@@ -56,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 14 * 60 * 1000); // 14 minut
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [mounted]);
 
   const loadUser = async (authToken: string) => {
     try {
