@@ -3,6 +3,7 @@ const router = express.Router();
 const { getAllLessons, getLessonByTopicId } = require('../db/models/lessons');
 const { getTopicById } = require('../db/models/topics');
 const { successResponse } = require('../utils/response-helpers');
+const { asyncHandler, AppError } = require('../middleware/errorHandler');
 
 /**
  * @swagger
@@ -76,38 +77,25 @@ const { successResponse } = require('../utils/response-helpers');
  *       500:
  *         description: Chyba serveru
  */
-router.get('/:topicId', (req, res) => {
-  try {
-    const topicId = parseInt(req.params.topicId);
-    
-    const topic = getTopicById(topicId);
-    if (!topic) {
-      return res.status(404).json({
-        success: false,
-        error: 'Téma nenalezeno'
-      });
-    }
-    
-    const lesson = getLessonByTopicId(topicId);
-    
-    if (!lesson) {
-      return res.status(404).json({
-        success: false,
-        error: 'Lekce pro toto téma nebyla nalezena'
-      });
-    }
-    
-    res.json({
-      success: true,
-      data: lesson
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání lekce'
-    });
+router.get('/:topicId', asyncHandler((req, res) => {
+  const topicId = parseInt(req.params.topicId);
+  
+  const topic = getTopicById(topicId);
+  if (!topic) {
+    throw new AppError('Téma nenalezeno', 404);
   }
-});
+  
+  const lesson = getLessonByTopicId(topicId);
+  
+  if (!lesson) {
+    throw new AppError('Lekce pro toto téma nebyla nalezena', 404);
+  }
+  
+  res.json({
+    success: true,
+    data: lesson
+  });
+}));
 
 /**
  * @swagger
@@ -135,21 +123,14 @@ router.get('/:topicId', (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.get('/', (req, res) => {
-  try {
-    const lessonsWithTopics = getAllLessons();
-    
-    res.json({
-      success: true,
-      count: lessonsWithTopics.length,
-      data: lessonsWithTopics
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání lekcí'
-    });
-  }
-});
+router.get('/', asyncHandler((req, res) => {
+  const lessonsWithTopics = getAllLessons();
+  
+  res.json({
+    success: true,
+    count: lessonsWithTopics.length,
+    data: lessonsWithTopics
+  });
+}));
 
 module.exports = router;

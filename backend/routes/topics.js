@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getAllTopics, getTopicById, getTopicsByCategory } = require('../db/models/topics');
 const { successResponse } = require('../utils/response-helpers');
+const { asyncHandler, AppError } = require('../middleware/errorHandler');
 
 /**
  * @swagger
@@ -66,21 +67,14 @@ const { successResponse } = require('../utils/response-helpers');
  *       500:
  *         description: Chyba serveru
  */
-router.get('/', (req, res) => {
-  try {
-    const topics = getAllTopics();
-    res.json({
-      success: true,
-      count: topics.length,
-      data: topics
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání témat'
-    });
-  }
-});
+router.get('/', asyncHandler((req, res) => {
+  const topics = getAllTopics();
+  res.json({
+    success: true,
+    count: topics.length,
+    data: topics
+  });
+}));
 
 /**
  * @swagger
@@ -115,29 +109,19 @@ router.get('/', (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.get('/:id', (req, res) => {
-  try {
-    const topicId = parseInt(req.params.id);
-    const topic = getTopicById(topicId);
-    
-    if (!topic) {
-      return res.status(404).json({
-        success: false,
-        error: 'Téma nenalezeno'
-      });
-    }
-    
-    res.json({
-      success: true,
-      data: topic
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání tématu'
-    });
+router.get('/:id', asyncHandler((req, res) => {
+  const topicId = parseInt(req.params.id);
+  const topic = getTopicById(topicId);
+  
+  if (!topic) {
+    throw new AppError('Téma nenalezeno', 404);
   }
-});
+  
+  res.json({
+    success: true,
+    data: topic
+  });
+}));
 
 /**
  * @swagger
@@ -173,22 +157,15 @@ router.get('/:id', (req, res) => {
  *       500:
  *         description: Chyba serveru
  */
-router.get('/category/:category', (req, res) => {
-  try {
-    const category = req.params.category;
-    const filteredTopics = getTopicsByCategory(category);
-    
-    res.json({
-      success: true,
-      count: filteredTopics.length,
-      data: filteredTopics
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání témat podle kategorie'
-    });
-  }
-});
+router.get('/category/:category', asyncHandler((req, res) => {
+  const category = req.params.category;
+  const filteredTopics = getTopicsByCategory(category);
+  
+  res.json({
+    success: true,
+    count: filteredTopics.length,
+    data: filteredTopics
+  });
+}));
 
 module.exports = router;

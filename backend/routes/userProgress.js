@@ -3,7 +3,7 @@ const router = express.Router();
 const { getUserProgress, completeLesson, saveQuizResult, resetProgress } = require('../db/models/userProgress');
 const { optionalAuth, authenticateToken } = require('../middleware/auth');
 const { validateCompleteLesson, validateSaveQuizResult } = require('../middleware/validators');
-const { asyncHandler } = require('../middleware/errorHandler');
+const { asyncHandler, AppError } = require('../middleware/errorHandler');
 
 /**
  * @swagger
@@ -95,35 +95,28 @@ const { asyncHandler } = require('../middleware/errorHandler');
  *       500:
  *         description: Chyba serveru
  */
-router.get('/', optionalAuth, (req, res) => {
-  try {
-    // Pro nepřihlášené uživatele vrátit prázdný progress
-    if (!req.user) {
-      return res.json({
-        success: true,
-        data: {
-          completedLessons: [],
-          quizResults: [],
-          totalPoints: 0,
-          level: 1,
-          badges: []
-        }
-      });
-    }
-    
-    const userId = String(req.user.userId);
-    const progress = getUserProgress(userId);
-    res.json({
+router.get('/', optionalAuth, asyncHandler((req, res) => {
+  // Pro nepřihlášené uživatele vrátit prázdný progress
+  if (!req.user) {
+    return res.json({
       success: true,
-      data: progress
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při načítání pokroku'
+      data: {
+        completedLessons: [],
+        quizResults: [],
+        totalPoints: 0,
+        level: 1,
+        badges: []
+      }
     });
   }
-});
+  
+  const userId = String(req.user.userId);
+  const progress = getUserProgress(userId);
+  res.json({
+    success: true,
+    data: progress
+  });
+}));
 
 /**
  * @swagger
@@ -252,30 +245,20 @@ router.post('/save-quiz-result', optionalAuth, validateSaveQuizResult, asyncHand
  *       500:
  *         description: Chyba serveru
  */
-router.post('/reset', optionalAuth, (req, res) => {
-  try {
-    // Vyžadovat přihlášení pro reset pokroku
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        error: 'Pro reset pokroku se musíte přihlásit'
-      });
-    }
-    
-    const userId = String(req.user.userId);
-    const progress = resetProgress(userId);
-    
-    res.json({
-      success: true,
-      message: 'Pokrok byl resetován',
-      data: progress
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Chyba při resetování pokroku'
-    });
+router.post('/reset', optionalAuth, asyncHandler((req, res) => {
+  // Vyžadovat přihlášení pro reset pokroku
+  if (!req.user) {
+    throw new AppError('Pro reset pokroku se musíte přihlásit', 401);
   }
-});
+  
+  const userId = String(req.user.userId);
+  const progress = resetProgress(userId);
+  
+  res.json({
+    success: true,
+    message: 'Pokrok byl resetován',
+    data: progress
+  });
+}));
 
 module.exports = router;
