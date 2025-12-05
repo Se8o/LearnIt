@@ -3,6 +3,14 @@ const bcrypt = require('bcryptjs');
 const { AppError } = require('../../middleware/errorHandler');
 const { mapDbRow } = require('../../utils/db-helpers');
 
+/**
+ * Create a new user with hashed password and initialize user stats
+ * @param {string} email - User email (unique)
+ * @param {string} password - Plain text password (will be hashed)
+ * @param {string} name - User display name
+ * @returns {Promise<Object>} Created user object
+ * @throws {AppError} If email already exists or required fields missing
+ */
 const createUser = async (email, password, name) => {
   if (!email || !password || !name) {
     throw new AppError('Email, heslo a jméno jsou povinné', 400);
@@ -39,6 +47,11 @@ const createUser = async (email, password, name) => {
   };
 };
 
+/**
+ * Find user by email (case-insensitive)
+ * @param {string} email - User email
+ * @returns {Object|undefined} User object with passwordHash or undefined if not found
+ */
 const getUserByEmail = (email) => {
   const db = getDb();
   const user = db.prepare(`
@@ -49,6 +62,11 @@ const getUserByEmail = (email) => {
   return mapDbRow(user);
 };
 
+/**
+ * Find user by ID
+ * @param {number} id - User ID
+ * @returns {Object|undefined} User object or undefined if not found
+ */
 const getUserById = (id) => {
   const db = getDb();
   const user = db.prepare(`
@@ -59,10 +77,24 @@ const getUserById = (id) => {
   return mapDbRow(user);
 };
 
+/**
+ * Validate password against hash
+ * @param {string} password - Plain text password
+ * @param {string} hash - Bcrypt password hash
+ * @returns {Promise<boolean>} True if password matches
+ */
 const validatePassword = async (password, hash) => {
   return await bcrypt.compare(password, hash);
 };
 
+/**
+ * Update user profile
+ * @param {number} id - User ID
+ * @param {Object} updates - Updates object
+ * @param {string} updates.name - New display name
+ * @returns {Object} Updated user object
+ * @throws {AppError} If user not found or name is empty
+ */
 const updateUser = (id, updates) => {
   if (!updates.name || updates.name.trim() === '') {
     throw new AppError('Jméno je povinné', 400);

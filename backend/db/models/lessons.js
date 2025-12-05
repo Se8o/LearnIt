@@ -1,6 +1,10 @@
 const { getDb } = require('../setup');
 const { mapDbRow, parseJsonField, mapTopicData } = require('../../utils/db-helpers');
 
+/**
+ * Get all lessons with topic information
+ * @returns {Array<Object>} Array of lesson objects with parsed keyPoints and topic data
+ */
 const getAllLessons = () => {
   const db = getDb();
   const lessons = db.prepare(`
@@ -19,6 +23,11 @@ const getAllLessons = () => {
   });
 };
 
+/**
+ * Get lesson by topic ID with full topic information
+ * @param {number} topicId - Topic ID
+ * @returns {Object|null} Lesson object with parsed keyPoints and topic data, or null if not found
+ */
 const getLessonByTopicId = (topicId) => {
   const db = getDb();
   const lesson = db.prepare(`
@@ -38,6 +47,18 @@ const getLessonByTopicId = (topicId) => {
   };
 };
 
+/**
+ * Create a new lesson
+ * @param {Object} lesson - Lesson data
+ * @param {number} lesson.topicId - Topic ID
+ * @param {string} lesson.title - Lesson title
+ * @param {string} lesson.content - Lesson content
+ * @param {string} lesson.videoUrl - Video URL
+ * @param {string} lesson.videoTitle - Video title
+ * @param {number} lesson.estimatedTime - Estimated time in minutes
+ * @param {Array<string>} lesson.keyPoints - Key learning points
+ * @returns {number} ID of created lesson
+ */
 const createLesson = (lesson) => {
   const db = getDb();
   const stmt = db.prepare(`

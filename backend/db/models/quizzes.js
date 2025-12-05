@@ -1,6 +1,11 @@
 const { getDb } = require('../setup');
 const { mapDbRow, parseJsonField, mapTopicData } = require('../../utils/db-helpers');
 
+/**
+ * Get quiz by topic ID with questions and topic information
+ * @param {number} topicId - Topic ID
+ * @returns {Object|null} Quiz object with questions array and topic data, or null if not found
+ */
 const getQuizByTopicId = (topicId) => {
   const db = getDb();
   
@@ -33,6 +38,13 @@ const getQuizByTopicId = (topicId) => {
   };
 };
 
+/**
+ * Create a new quiz
+ * @param {Object} quiz - Quiz data
+ * @param {number} quiz.topicId - Topic ID
+ * @param {string} quiz.title - Quiz title
+ * @returns {number} ID of created quiz
+ */
 const createQuiz = (quiz) => {
   const db = getDb();
   const stmt = db.prepare(`
@@ -43,6 +55,16 @@ const createQuiz = (quiz) => {
   return result.lastInsertRowid;
 };
 
+/**
+ * Create a new quiz question
+ * @param {number} quizId - Quiz ID
+ * @param {Object} question - Question data
+ * @param {string} question.question - Question text
+ * @param {Array<string>} question.options - Answer options
+ * @param {number} question.correctAnswer - Index of correct answer (0-based)
+ * @param {string} question.explanation - Explanation of correct answer
+ * @returns {number} ID of created question
+ */
 const createQuizQuestion = (quizId, question) => {
   const db = getDb();
   const stmt = db.prepare(`

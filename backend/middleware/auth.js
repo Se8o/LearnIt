@@ -3,6 +3,13 @@ const { config } = require('../config/env');
 
 const JWT_SECRET = config.jwt.secret;
 
+/**
+ * Middleware to authenticate JWT token from Authorization header
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {void}
+ */
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -27,6 +34,13 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+/**
+ * Optional authentication middleware - adds user to request if valid token present
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {void}
+ */
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
