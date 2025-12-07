@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getAllLessons, getLessonByTopicId } = require('../db/models/lessons');
 const { getTopicById } = require('../db/models/topics');
+const { validateTopicId } = require('../middleware/validators');
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
 
 /**
@@ -76,7 +77,7 @@ const { asyncHandler, AppError } = require('../middleware/errorHandler');
  *       500:
  *         description: Chyba serveru
  */
-router.get('/:topicId', asyncHandler((req, res) => {
+router.get('/:topicId', validateTopicId, asyncHandler((req, res) => {
   const topicId = parseInt(req.params.topicId);
   
   const topic = getTopicById(topicId);
