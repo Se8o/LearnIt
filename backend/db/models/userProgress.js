@@ -1,6 +1,12 @@
 const { getDb } = require('../setup');
 
+/**
+ * Get user progress
+ * @param {string|number} userId - User ID (auto-converted to string for SQLite)
+ */
 const getUserProgress = (userId = 'default') => {
+  // Ensure userId is string for consistent database queries
+  userId = String(userId);
   const db = getDb();
   
   const completedLessons = db.prepare(`
@@ -48,6 +54,7 @@ const getUserProgress = (userId = 'default') => {
 };
 
 const updateStreak = (userId) => {
+  userId = String(userId);
   const db = getDb();
   const stats = db.prepare('SELECT last_activity_date, current_streak, longest_streak FROM user_stats WHERE user_id = ?').get(userId);
   
@@ -85,7 +92,12 @@ const updateStreak = (userId) => {
   }
 };
 
+/**
+ * Complete a lesson
+ * @param {string|number} userId - User ID (auto-converted to string for SQLite)
+ */
 const completeLesson = (userId = 'default', topicId, lessonId) => {
+  userId = String(userId);
   const db = getDb();
   
   const existing = db.prepare(`
@@ -114,7 +126,12 @@ const completeLesson = (userId = 'default', topicId, lessonId) => {
   return getUserProgress(userId);
 };
 
+/**
+ * Save quiz result
+ * @param {string|number} userId - User ID (auto-converted to string for SQLite)
+ */
 const saveQuizResult = (userId = 'default', topicId, score, percentage) => {
+  userId = String(userId);
   const db = getDb();
   
   db.prepare(`
@@ -150,6 +167,7 @@ const saveQuizResult = (userId = 'default', topicId, score, percentage) => {
 };
 
 const updateLevel = (userId) => {
+  userId = String(userId);
   const db = getDb();
   const stats = db.prepare('SELECT total_points FROM user_stats WHERE user_id = ?').get(userId);
   const newLevel = Math.floor(stats.total_points / 100) + 1;
@@ -162,6 +180,7 @@ const updateLevel = (userId) => {
 };
 
 const updateBadges = (userId, percentage = null) => {
+  userId = String(userId);
   const db = getDb();
   const stats = db.prepare('SELECT badges, current_streak, perfect_quiz_streak FROM user_stats WHERE user_id = ?').get(userId);
   const badges = JSON.parse(stats.badges);
@@ -235,7 +254,12 @@ const updateBadges = (userId, percentage = null) => {
   }
 };
 
+/**
+ * Reset user progress
+ * @param {string|number} userId - User ID (auto-converted to string for SQLite)
+ */
 const resetProgress = (userId = 'default') => {
+  userId = String(userId);
   const db = getDb();
   
   db.prepare('DELETE FROM user_progress WHERE user_id = ?').run(userId);

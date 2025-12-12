@@ -110,7 +110,7 @@ router.get('/', optionalAuth, asyncHandler((req, res) => {
     });
   }
   
-  const userId = String(req.user.userId);
+  const userId = req.user.userId;
   const progress = getUserProgress(userId);
   res.json({
     success: true,
@@ -158,7 +158,7 @@ router.post('/complete-lesson', optionalAuth, validateCompleteLesson, asyncHandl
   }
   
   const { topicId, lessonId } = req.body;
-  const userId = String(req.user.userId);
+  const userId = req.user.userId;
   const progress = completeLesson(userId, topicId, lessonId);
   
   res.json({
@@ -210,7 +210,7 @@ router.post('/save-quiz-result', optionalAuth, validateSaveQuizResult, asyncHand
   }
   
   const { topicId, score, percentage } = req.body;
-  const userId = String(req.user.userId);
+  const userId = req.user.userId;
   const result = saveQuizResult(userId, topicId, score, percentage);
   
   res.json({
@@ -251,7 +251,7 @@ router.post('/reset', optionalAuth, asyncHandler((req, res) => {
     throw new AppError('Pro reset pokroku se musíte přihlásit', 401);
   }
   
-  const userId = String(req.user.userId);
+  const userId = req.user.userId;
   const progress = resetProgress(userId);
   
   res.json({
