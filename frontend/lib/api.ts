@@ -112,45 +112,50 @@ export interface AuthResponse {
 
 // API Functions
 export const topicsApi = {
-  getAll: async () => {
-    const response = await api.get<{ success: boolean; count: number; data: Topic[] }>('/api/topics');
+  getAll: async (signal?: AbortSignal) => {
+    const response = await api.get<{ success: boolean; count: number; data: Topic[] }>('/api/topics', { signal });
     return response.data;
   },
-  getById: async (id: number) => {
-    const response = await api.get<{ success: boolean; data: Topic }>(`/api/topics/${id}`);
+  getById: async (id: number, signal?: AbortSignal) => {
+    const response = await api.get<{ success: boolean; data: Topic }>(`/api/topics/${id}`, { signal });
     return response.data;
   },
 };
 
 export const lessonsApi = {
-  getAll: async () => {
-    const response = await api.get<{ success: boolean; count: number; data: Lesson[] }>('/api/lessons');
+  getAll: async (signal?: AbortSignal) => {
+    const response = await api.get<{ success: boolean; count: number; data: Lesson[] }>('/api/lessons', { signal });
     return response.data;
   },
-  getByTopicId: async (topicId: number) => {
-    const response = await api.get<{ success: boolean; data: Lesson }>(`/api/lessons/${topicId}`);
+  getByTopicId: async (topicId: number, signal?: AbortSignal) => {
+    const response = await api.get<{ success: boolean; data: Lesson }>(`/api/lessons/${topicId}`, { signal });
     return response.data;
   },
 };
 
 export const quizApi = {
-  getByTopicId: async (topicId: number) => {
-    const response = await api.get<{ success: boolean; data: Quiz }>(`/api/quiz/${topicId}`);
+  getByTopicId: async (topicId: number, signal?: AbortSignal) => {
+    const response = await api.get<{ success: boolean; data: Quiz }>(`/api/quiz/${topicId}`, { signal });
     return response.data;
   },
-  submit: async (topicId: number, answers: number[]) => {
-    const response = await api.post<QuizSubmitResponse>('/api/quiz/submit', {
-      topicId,
-      answers,
-    });
+  submit: async (topicId: number, answers: number[], token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await api.post<QuizSubmitResponse>(
+      '/api/quiz/submit',
+      {
+        topicId,
+        answers,
+      },
+      { headers }
+    );
     return response.data;
   },
 };
 
 export const userProgressApi = {
-  get: async (token?: string) => {
+  get: async (token?: string, signal?: AbortSignal) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await api.get<{ success: boolean; data: UserProgress }>('/api/user-progress', { headers });
+    const response = await api.get<{ success: boolean; data: UserProgress }>('/api/user-progress', { headers, signal });
     return response.data;
   },
   completeLesson: async (topicId: number, lessonId: number, token?: string) => {

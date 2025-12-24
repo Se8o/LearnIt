@@ -17,20 +17,33 @@ export default function TopicsPage() {
   const [sortBy, setSortBy] = useState<string>('default');
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const fetchTopics = async () => {
       try {
-        const response = await topicsApi.getAll();
+        const response = await topicsApi.getAll(signal);
         setTopics(response.data);
         setFilteredTopics(response.data);
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === 'CanceledError') {
+          console.log('Topics fetch canceled');
+          return;
+        }
         setError('Nepodařilo se načíst témata. Zkontrolujte, zda backend běží.');
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchTopics();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   // Filter and search logic

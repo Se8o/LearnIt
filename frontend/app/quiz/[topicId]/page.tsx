@@ -24,20 +24,37 @@ export default function QuizPage() {
   const [results, setResults] = useState<any>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const fetchQuiz = async () => {
       try {
-        const response = await quizApi.getByTopicId(topicId);
+        setLoading(true);
+        setError(null);
+        setQuiz(null);
+
+        const response = await quizApi.getByTopicId(topicId, signal);
         setQuiz(response.data);
         setAnswers(new Array(response.data.questions.length).fill(-1));
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === 'CanceledError') {
+          console.log('Quiz fetch canceled');
+          return;
+        }
         setError('Nepodařilo se načíst kvíz.');
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchQuiz();
+
+    return () => {
+      controller.abort();
+    };
   }, [topicId]);
 
   const handleAnswerSelect = (answerIndex: number) => {

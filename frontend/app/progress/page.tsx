@@ -23,24 +23,35 @@ export default function ProgressPage() {
       return;
     }
     
-    const fetchData = async () => {
+    const fetchData = async (signal: AbortSignal) => {
       try {
         const [progressResponse, topicsResponse] = await Promise.all([
-          userProgressApi.get(token),
-          topicsApi.getAll(),
+          userProgressApi.get(token, signal),
+          topicsApi.getAll(signal),
         ]);
         setProgress(progressResponse.data);
         setTopics(topicsResponse.data);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === 'CanceledError') {
+          console.log('Progress fetch canceled');
+          return;
+        }
         setError('Nepodařilo se načíst pokrok.');
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchData();
+    const controller = new AbortController();
+    fetchData(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
   }, [token, authLoading]);
 
   const handleReset = async () => {

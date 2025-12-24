@@ -20,19 +20,37 @@ export default function LessonPage() {
   const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const fetchLesson = async () => {
       try {
-        const response = await lessonsApi.getByTopicId(topicId);
+        // Reset state for new topic
+        setLoading(true);
+        setError(null);
+        setLesson(null);
+
+        const response = await lessonsApi.getByTopicId(topicId, signal);
         setLesson(response.data);
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === 'CanceledError') {
+          console.log('Lesson fetch canceled');
+          return;
+        }
         setError('Nepodařilo se načíst lekci.');
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchLesson();
+
+    return () => {
+      controller.abort();
+    };
   }, [topicId]);
 
   const handleCompleteLesson = async () => {
