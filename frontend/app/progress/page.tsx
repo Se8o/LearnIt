@@ -6,6 +6,7 @@ import { userProgressApi, topicsApi, UserProgress, Topic } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorMessage } from '@/components/ErrorMessage';
+import { BADGE_INFO, BadgeType } from '@/lib/constants';
 
 export default function ProgressPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -73,42 +74,8 @@ export default function ProgressPage() {
   };
 
   const getBadgeInfo = (badge: string) => {
-    const badges: Record<string, { name: string; icon: string; description: string }> = {
-      'perfect-score': {
-        name: 'Perfektní skóre',
-        icon: '🌟',
-        description: '100% úspěšnost v kvízu',
-      },
-      'beginner': {
-        name: 'Začátečník',
-        icon: '📚',
-        description: '3 dokončené lekce',
-      },
-      'bookworm': {
-        name: 'Knižní mol',
-        icon: '📖',
-        description: '20 dokončených lekcí',
-      },
-      'week-warrior': {
-        name: 'Týdení bojovník',
-        icon: '🔥',
-        description: '7 dní učení v řadě',
-      },
-      'quiz-master': {
-        name: 'Kvízový mistr',
-        icon: '🏆',
-        description: '10 perfektních kvízů',
-      },
-      'perfectionist': {
-        name: 'Perfekcionista',
-        icon: '⭐',
-        description: '5 perfektních kvízů v řadě',
-      },
-      'all-topics': {
-        name: 'Univerální znalec',
-        icon: '🎓',
-        description: 'Lekce ze všech kategorií',
-      },
+    return BADGE_INFO[badge as BadgeType] || null;
+  };
     };
     return badges[badge] || { name: badge, icon: '', description: '' };
   };
