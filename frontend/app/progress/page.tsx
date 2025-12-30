@@ -76,9 +76,6 @@ export default function ProgressPage() {
   const getBadgeInfo = (badge: string) => {
     return BADGE_INFO[badge as BadgeType] || null;
   };
-    };
-    return badges[badge] || { name: badge, icon: '', description: '' };
-  };
 
   if (loading) {
     return <LoadingSpinner message="Načítám pokrok..." />;
@@ -153,6 +150,7 @@ export default function ProgressPage() {
           <div className="grid md:grid-cols-3 gap-4">
             {progress.badges.map((badge, index) => {
               const badgeInfo = getBadgeInfo(badge);
+              if (!badgeInfo) return null;
               return (
                 <div
                   key={index}

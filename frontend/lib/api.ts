@@ -138,7 +138,7 @@ export const quizApi = {
     const response = await api.get<{ success: boolean; data: Quiz }>(`/api/quiz/${topicId}`, { signal });
     return response.data;
   },
-  submit: async (topicId: number, answers: number[], token?: string) => {
+  submit: async (topicId: number, answers: number[], token?: string, signal?: AbortSignal) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await api.post<QuizSubmitResponse>(
       '/api/quiz/submit',
@@ -146,7 +146,7 @@ export const quizApi = {
         topicId,
         answers,
       },
-      { headers }
+      { headers, signal }
     );
     return response.data;
   },
@@ -158,27 +158,27 @@ export const userProgressApi = {
     const response = await api.get<{ success: boolean; data: UserProgress }>('/api/user-progress', { headers, signal });
     return response.data;
   },
-  completeLesson: async (topicId: number, lessonId: number, token?: string) => {
+  completeLesson: async (topicId: number, lessonId: number, token?: string, signal?: AbortSignal) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await api.post<{ success: boolean; data: UserProgress }>(
       '/api/user-progress/complete-lesson',
       { topicId, lessonId },
-      { headers }
+      { headers, signal }
     );
     return response.data;
   },
-  saveQuizResult: async (topicId: number, score: any, percentage: number, token?: string) => {
+  saveQuizResult: async (topicId: number, score: any, percentage: number, token?: string, signal?: AbortSignal) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await api.post<{ success: boolean; data: UserProgress; pointsEarned: number }>(
       '/api/user-progress/save-quiz-result',
       { topicId, score, percentage },
-      { headers }
+      { headers, signal }
     );
     return response.data;
   },
-  reset: async (token?: string) => {
+  reset: async (token?: string, signal?: AbortSignal) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await api.post<{ success: boolean; data: UserProgress }>('/api/user-progress/reset', {}, { headers });
+    const response = await api.post<{ success: boolean; data: UserProgress }>('/api/user-progress/reset', {}, { headers, signal });
     return response.data;
   },
 };

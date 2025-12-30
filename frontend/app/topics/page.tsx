@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { topicsApi, Topic } from '@/lib/api';
+import { DIFFICULTY, DIFFICULTY_LABELS, DIFFICULTY_ORDER } from '@/lib/constants';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorMessage } from '@/components/ErrorMessage';
 
@@ -83,8 +84,7 @@ export default function TopicsPage() {
         result.sort((a, b) => a.title.localeCompare(b.title, 'cs'));
         break;
       case 'difficulty':
-        const difficultyOrder = { beginner: 1, intermediate: 2, advanced: 3 };
-        result.sort((a, b) => difficultyOrder[a.difficulty as keyof typeof difficultyOrder] - difficultyOrder[b.difficulty as keyof typeof difficultyOrder]);
+        result.sort((a, b) => DIFFICULTY_ORDER[a.difficulty as keyof typeof DIFFICULTY_ORDER] - DIFFICULTY_ORDER[b.difficulty as keyof typeof DIFFICULTY_ORDER]);
         break;
       default:
         // Keep original order
@@ -168,9 +168,9 @@ export default function TopicsPage() {
                 className="px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none bg-white"
               >
                 <option value="all">Všechny</option>
-                <option value="beginner">Začátečník</option>
-                <option value="intermediate">Středně pokročilý</option>
-                <option value="advanced">Pokročilý</option>
+                <option value={DIFFICULTY.BEGINNER}>{DIFFICULTY_LABELS[DIFFICULTY.BEGINNER]}</option>
+                <option value={DIFFICULTY.INTERMEDIATE}>{DIFFICULTY_LABELS[DIFFICULTY.INTERMEDIATE]}</option>
+                <option value={DIFFICULTY.ADVANCED}>{DIFFICULTY_LABELS[DIFFICULTY.ADVANCED]}</option>
               </select>
             </div>
 
@@ -236,9 +236,7 @@ export default function TopicsPage() {
                     className="px-3 py-1 rounded-full text-xs font-medium"
                     style={{ backgroundColor: `${topic.color}20`, color: topic.color }}
                   >
-                    {topic.difficulty === 'beginner' && 'Začátečník'}
-                    {topic.difficulty === 'intermediate' && 'Středně pokročilý'}
-                    {topic.difficulty === 'advanced' && 'Pokročilý'}
+                    {DIFFICULTY_LABELS[topic.difficulty as keyof typeof DIFFICULTY_LABELS] || 'Neznámá obtížnost'}
                   </span>
                 </div>
 

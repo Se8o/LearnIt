@@ -23,6 +23,26 @@ export const BADGE_TYPES = {
  */
 export type BadgeType = (typeof BADGE_TYPES)[keyof typeof BADGE_TYPES];
 
+export const DIFFICULTY = {
+  BEGINNER: 'beginner',
+  INTERMEDIATE: 'intermediate',
+  ADVANCED: 'advanced',
+} as const;
+
+export type Difficulty = (typeof DIFFICULTY)[keyof typeof DIFFICULTY];
+
+export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  [DIFFICULTY.BEGINNER]: 'Začátečník',
+  [DIFFICULTY.INTERMEDIATE]: 'Středně pokročilý',
+  [DIFFICULTY.ADVANCED]: 'Pokročilý',
+};
+
+export const DIFFICULTY_ORDER: Record<Difficulty, number> = {
+  [DIFFICULTY.BEGINNER]: 1,
+  [DIFFICULTY.INTERMEDIATE]: 2,
+  [DIFFICULTY.ADVANCED]: 3,
+};
+
 /**
  * A record mapping each badge type to its display information.
  * This includes the badge's name, icon, and a description of how to earn it.
