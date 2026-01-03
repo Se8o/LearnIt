@@ -65,15 +65,17 @@ export interface QuizResult {
   explanation: string;
 }
 
+export interface QuizScore {
+  correct: number;
+  total: number;
+  percentage: number;
+}
+
 export interface QuizSubmitResponse {
   success: boolean;
   data: {
     results: QuizResult[];
-    score: {
-      correct: number;
-      total: number;
-      percentage: number;
-    };
+    score: QuizScore;
     feedback: string;
     level: string;
   };
@@ -85,7 +87,12 @@ export interface UserProgress {
     lessonId: number;
     completedAt: string;
   }>;
-  quizResults: Array<any>;
+  quizResults: Array<{
+    topicId: number;
+    percentage: number;
+    score: QuizScore;
+    completedAt: string;
+  }>;
   totalPoints: number;
   level: number;
   badges: string[];
@@ -167,7 +174,13 @@ export const userProgressApi = {
     );
     return response.data;
   },
-  saveQuizResult: async (topicId: number, score: any, percentage: number, token?: string, signal?: AbortSignal) => {
+  saveQuizResult: async (
+    topicId: number,
+    score: QuizScore,
+    percentage: number,
+    token?: string,
+    signal?: AbortSignal
+  ) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await api.post<{ success: boolean; data: UserProgress; pointsEarned: number }>(
       '/api/user-progress/save-quiz-result',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -22,8 +23,12 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push('/topics');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Chyba při přihlašování. Zkuste to prosím znovu.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || 'Chyba při přihlašování. Zkuste to prosím znovu.');
+      } else {
+        setError('Chyba při přihlašování. Zkuste to prosím znovu.');
+      }
     } finally {
       setLoading(false);
     }

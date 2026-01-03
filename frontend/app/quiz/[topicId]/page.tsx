@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { quizApi, userProgressApi, Quiz, QuizResult } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -21,7 +22,7 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<QuizSubmitResponse['data'] | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -36,8 +37,8 @@ export default function QuizPage() {
         const response = await quizApi.getByTopicId(topicId, signal);
         setQuiz(response.data);
         setAnswers(new Array(response.data.questions.length).fill(-1));
-      } catch (err: any) {
-        if (err.name === 'CanceledError') {
+      } catch (err: unknown) {
+        if (axios.isCancel(err) || (err instanceof Error && err.name === 'CanceledError')) {
           console.log('Quiz fetch canceled');
           return;
         }

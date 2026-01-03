@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { lessonsApi, userProgressApi, Lesson } from '@/lib/api';
@@ -32,8 +33,8 @@ export default function LessonPage() {
 
         const response = await lessonsApi.getByTopicId(topicId, signal);
         setLesson(response.data);
-      } catch (err: any) {
-        if (err.name === 'CanceledError') {
+      } catch (err: unknown) {
+        if (axios.isCancel(err) || (err instanceof Error && err.name === 'CanceledError')) {
           console.log('Lesson fetch canceled');
           return;
         }

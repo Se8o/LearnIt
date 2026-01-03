@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Component, ReactNode } from 'react';
+import Link from 'next/link';
 
 interface Props {
   children: ReactNode;
@@ -106,12 +107,12 @@ class ErrorBoundary extends Component<Props, State> {
               >
                 Zkusit znovu
               </button>
-              <a
+              <Link
                 href="/"
                 className="w-full text-center bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all"
               >
                 Zpět na hlavní stránku
-              </a>
+              </Link>
             </div>
           </div>
         </div>

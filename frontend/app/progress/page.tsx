@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import Link from 'next/link';
 import { userProgressApi, topicsApi, UserProgress, Topic } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -33,8 +34,8 @@ export default function ProgressPage() {
         setProgress(progressResponse.data);
         setTopics(topicsResponse.data);
         setError(null);
-      } catch (err: any) {
-        if (err.name === 'CanceledError') {
+      } catch (err: unknown) {
+        if (axios.isCancel(err) || (err instanceof Error && err.name === 'CanceledError')) {
           console.log('Progress fetch canceled');
           return;
         }
@@ -197,7 +198,7 @@ export default function ProgressPage() {
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-bold mb-6">Výsledky kvízů</h2>
           <div className="space-y-4">
-            {progress.quizResults.map((result: any, index: number) => {
+            {progress.quizResults.map((result, index) => {
               const topic = topics.find((t) => t.id === result.topicId);
               return (
                 <div

@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
+/* Enable Tailwind's dark: variant using the .dark class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
 }
 
+/* Keep Tailwind theme variables in sync with our light/dark palette */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,11 +17,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Apply dark palette when .dark class is present (set by ThemeProvider toggle) */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
 }
 
 body {

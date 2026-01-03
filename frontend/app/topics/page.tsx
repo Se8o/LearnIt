@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import Link from 'next/link';
 import { topicsApi, Topic } from '@/lib/api';
 import { DIFFICULTY, DIFFICULTY_LABELS, DIFFICULTY_ORDER } from '@/lib/constants';
@@ -26,8 +27,8 @@ export default function TopicsPage() {
         const response = await topicsApi.getAll(signal);
         setTopics(response.data);
         setFilteredTopics(response.data);
-      } catch (err: any) {
-        if (err.name === 'CanceledError') {
+      } catch (err: unknown) {
+        if (axios.isCancel(err) || (err instanceof Error && err.name === 'CanceledError')) {
           console.log('Topics fetch canceled');
           return;
         }

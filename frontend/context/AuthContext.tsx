@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { authApi, User } from '@/lib/api';
 
 /**
@@ -37,6 +37,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
+  const refreshAccessToken = useCallback(async (refreshTok: string): Promise<boolean> => {
+    try {
+      const response = await authApi.refresh(refreshTok);
+      setToken(response.accessToken);
+      setUser(response.user);
+      localStorage.setItem('accessToken', response.accessToken);
+      return true;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      clearAuthData();
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadUser = useCallback(async (authToken: string) => {
+    try {
+      const response = await authApi.getMe(authToken);
+      setUser(response.user);
+    } catch (error) {
+      console.error('Failed to load user:', error);
+      // Pokud selže, zkusíme refresh token
+      const refreshTok = localStorage.getItem('refreshToken');
+      if (refreshTok) {
+        await refreshAccessToken(refreshTok);
+      } else {
+        clearAuthData();
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [refreshAccessToken]);
+
   useEffect(() => {
     if (!mounted) return;
     
@@ -63,41 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 14 * 60 * 1000); // 14 minut
 
     return () => clearInterval(intervalId);
-  }, [mounted]);
-
-  const loadUser = async (authToken: string) => {
-    try {
-      const response = await authApi.getMe(authToken);
-      setUser(response.user);
-    } catch (error) {
-      console.error('Failed to load user:', error);
-      // Pokud selže, zkusíme refresh token
-      const refreshTok = localStorage.getItem('refreshToken');
-      if (refreshTok) {
-        await refreshAccessToken(refreshTok);
-      } else {
-        clearAuthData();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const refreshAccessToken = async (refreshTok: string): Promise<boolean> => {
-    try {
-      const response = await authApi.refresh(refreshTok);
-      setToken(response.accessToken);
-      setUser(response.user);
-      localStorage.setItem('accessToken', response.accessToken);
-      return true;
-    } catch (error) {
-      console.error('Failed to refresh token:', error);
-      clearAuthData();
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [mounted, loadUser, refreshAccessToken]);
 
   const clearAuthData = () => {
     setUser(null);
