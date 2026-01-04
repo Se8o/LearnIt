@@ -81,17 +81,25 @@ export default function QuizPage() {
     try {
       const response = await quizApi.submit(topicId, finalAnswers);
       setResults(response.data);
-      
-      await userProgressApi.saveQuizResult(
-        topicId,
-        response.data.score,
-        response.data.score.percentage,
-        token || undefined
-      );
-      
+
+      if (token) {
+        await userProgressApi.saveQuizResult(
+          topicId,
+          response.data.score,
+          response.data.score.percentage,
+          token
+        );
+      } else {
+        console.warn('Quiz result not persisted (nepřihlášený uživatel).');
+      }
+
       setSubmitted(true);
     } catch (err) {
-      console.error('Chyba při odesílání kvízu:', err);
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        console.warn('Uloženie výsledků vyžaduje přihlášení.');
+      } else {
+        console.error('Chyba při odesílání kvízu:', err);
+      }
     }
   };
 

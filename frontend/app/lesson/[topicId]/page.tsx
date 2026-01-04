@@ -56,14 +56,26 @@ export default function LessonPage() {
 
   const handleCompleteLesson = async () => {
     if (!lesson) return;
+
+    // Require authentication before saving progress
+    if (!token) {
+      setError('Pro uložení pokroku se prosím přihlaste.');
+      router.push('/login');
+      return;
+    }
     setCompleting(true);
     
     try {
-      await userProgressApi.completeLesson(lesson.topicId, lesson.id, token || undefined);
+      await userProgressApi.completeLesson(lesson.topicId, lesson.id, token);
       router.push(`/quiz/${lesson.topicId}`);
     } catch (err) {
-      console.error('Chyba při ukládání pokroku:', err);
-      router.push(`/quiz/${lesson.topicId}`);
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        setError('Session vypršela, přihlaste se znovu.');
+        router.push('/login');
+      } else {
+        console.error('Chyba při ukládání pokroku:', err);
+        router.push(`/quiz/${lesson.topicId}`);
+      }
     }
   };
 
