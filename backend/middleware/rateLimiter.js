@@ -1,8 +1,9 @@
 const rateLimit = require('express-rate-limit');
 const { AppError } = require('./errorHandler');
 
-// Skip rate limiting in test environment
+// Skip rate limiting in tests and make development more permissive
 const skipRateLimiting = process.env.NODE_ENV === 'test';
+const isDevEnv = process.env.NODE_ENV !== 'production';
 
 /**
  * Obecný rate limiter - pro většinu endpointů
@@ -47,7 +48,8 @@ const authLimiter = rateLimit({
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hodina
   max: 3, // max 3 registrace za hodinu z jedné IP
-  skip: () => skipRateLimiting,
+  // Do not block developers locally; keep active in production
+  skip: () => skipRateLimiting || isDevEnv,
   message: 'Příliš mnoho registrací z této IP adresy',
   handler: (req, res) => {
     throw new AppError(
