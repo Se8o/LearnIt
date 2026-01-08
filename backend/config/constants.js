@@ -6,7 +6,7 @@
 // Validation constraints
 const VALIDATION = {
   PASSWORD: {
-    MIN_LENGTH: 8,
+    MIN_LENGTH: 6,
     MAX_LENGTH: 128,
     COMMON_PASSWORDS: ['password', '12345678', 'qwerty123', 'password123', 'admin123']
   },

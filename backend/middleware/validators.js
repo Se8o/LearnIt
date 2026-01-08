@@ -47,12 +47,10 @@ const validateRegister = [
     .withMessage('Email je příliš dlouhý'),
   
   body('password')
-    .isLength({ min: VALIDATION.PASSWORD.MIN_LENGTH })
-    .withMessage('Heslo musí mít alespoň 8 znaků')
-    .isLength({ max: VALIDATION.PASSWORD.MAX_LENGTH })
-    .withMessage('Heslo je příliš dlouhé')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
-    .withMessage('Heslo musí obsahovat malé písmeno, velké písmeno, číslo a speciální znak (@$!%*?&)'),
+    .isLength({ min: VALIDATION.PASSWORD.MIN_LENGTH, max: VALIDATION.PASSWORD.MAX_LENGTH })
+    .withMessage('Heslo musí mít 6-128 znaků')
+    .matches(/^(?=.*[A-Za-z])(?=.*\d).+$/)
+    .withMessage('Heslo musí obsahovat alespoň jedno písmeno a číslo'),
   
   body('password')
     .custom((value) => {
