@@ -21,7 +21,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
-  const mounted = typeof window !== 'undefined';
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
