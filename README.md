@@ -1,25 +1,25 @@
-# LearnIt - Interaktivní vzdělávací platforma 🎓
+# LearnIt - Interaktivní vzdělávací platforma
 
 Moderní full-stack vzdělávací platforma kombinující mikro-učení, gamifikaci a personalizovaný obsah pro efektivní a zábavný způsob učení.
 
-## 📖 O projektu
+## O projektu
 
 LearnIt je interaktivní vzdělávací platforma, která propojuje krátké lekce, multimediální obsah a gamifikaci. Uživatelé si zvolí téma a systém jim připraví 5minutovou lekci s vysvětlením, videem a kvízem.
 
-### ✨ Klíčové funkce
+### Klíčové funkce
 
-- ✅ **Mikro-lekce** - Max 5 minut, ideální pro „scroll & learn"
-- ✅ **Multimediální obsah** - Text (Markdown) + YouTube videa + kvízy
-- ✅ **Rozšířená gamifikace** - Body, 7 typů odznaků, úrovně, daily streaks, sledování pokroku
-- ✅ **🔥 Daily Streaks** - Denní série učení s bonus body (až 20 bodů za streak)
-- ✅ **🔍 Vyhledávání & Filtry** - Full-text search, filtry podle kategorie a obtížnosti, sorting
-- ✅ **🌙 Dark Mode** - Přepínání mezi světlým a tmavým režimem
-- ✅ **Autentizace** - JWT tokens, refresh tokens, bezpečné přihlášení
-- ✅ **RESTful API** - Swagger dokumentace, validace, rate limiting
-- ✅ **Moderní frontend** - Next.js 15, React 19, TypeScript, Tailwind CSS
-- ✅ **Testování** - 74 unit a integration testů (100% pass rate)
+- Mikro-lekce - Max 5 minut, ideální pro „scroll & learn"
+- Multimediální obsah - Text (Markdown) + YouTube videa + kvízy
+- Rozšířená gamifikace - Body, 7 typů odznaků, úrovně, daily streaks, sledování pokroku
+- Daily Streaks - Denní série učení s bonus body (až 20 bodů za streak)
+- Vyhledávání & Filtry - Full-text search, filtry podle kategorie a obtížnosti, sorting
+- Dark Mode - Přepínání mezi světlým a tmavým režimem
+- Autentizace - JWT tokens, refresh tokens, bezpečné přihlášení
+- RESTful API - Swagger dokumentace, validace, rate limiting
+- Moderní frontend - Next.js 15, React 19, TypeScript, Tailwind CSS
+- Testování - 74 unit a integration testů (100% pass rate)
 
-## 🏗️ Architektura
+## Architektura
 
 ```
 LearnIt/
@@ -43,9 +43,9 @@ LearnIt/
 └── docs/                # Documentation (guides, API tests)
 ```
 
-## 🚀 Rychlý start
+## Rychlý start
 
-### Možnost 1: Docker (Doporučeno) 🐳
+### Možnost 1: Docker (Doporučeno)
 
 ```bash
 # 1. Nainstalujte Docker Desktop
@@ -63,7 +63,7 @@ docker compose up -d
 docker compose down
 ```
 
-📖 Více v [DOCKER.md](./DOCKER.md)
+Více v [DOCKER.md](./DOCKER.md)
 
 ### Možnost 2: Manuální instalace
 
@@ -116,7 +116,7 @@ CORS_ORIGIN=http://localhost:3000
 LOG_LEVEL=info
 ```
 
-## 📡 API Endpointy
+## API Endpointy
 
 ### Autentizace
 - `POST /api/auth/register` - Registrace nového uživatele
@@ -146,13 +146,13 @@ LOG_LEVEL=info
 - `POST /api/user-progress/save-quiz-result` - Uložit výsledek kvízu
 - `POST /api/user-progress/reset` - Resetovat pokrok
 
-**📚 Kompletní API dokumentace:** [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
+Kompletní API dokumentace: [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
 
-## 🎨 Dostupná témata
+## Dostupná témata
 
-1. **Fyzika - Newtonovy zákony pohybu** ⚛️ (Začátečník, 5 min)
-2. **Biologie - Buněčná stavba** 🧬 (Začátečník, 4 min)
-3. **Psychologie - Základy motivace** 🧠 (Začátečník, 5 min)
+1. Fyzika - Newtonovy zákony pohybu (Začátečník, 5 min)
+2. Biologie - Buněčná stavba (Začátečník, 4 min)
+3. Psychologie - Základy motivace (Začátečník, 5 min)
 
 Každé téma obsahuje:
 - Markdown lekci s vysvětlením
@@ -160,53 +160,53 @@ Každé téma obsahuje:
 - Interaktivní kvíz (4 otázky)
 - Klíčové body k zapamatování
 
-## 💻 Technologie
+## Technologie
 
 ### Backend
-- **Runtime:** Node.js + Express.js
-- **Databáze:** SQLite (Better-SQLite3)
-- **Autentizace:** JWT tokens, bcrypt
-- **Validace:** Express-validator
-- **Dokumentace:** Swagger/OpenAPI
-- **Logging:** Winston
-- **Security:** Rate limiting, CORS, helmet
-- **Testing:** Jest, Supertest (74 tests, 100% pass)
-- **Připraveno pro TypeScript** - Types definované, migration guide
+- Runtime: Node.js + Express.js
+- Databáze: SQLite (Better-SQLite3)
+- Autentizace: JWT tokens, bcrypt
+- Validace: Express-validator
+- Dokumentace: Swagger/OpenAPI
+- Logging: Winston
+- Security: Rate limiting, CORS, helmet
+- Testing: Jest, Supertest (74 tests, 100% pass)
+- Připraveno pro TypeScript - Types definované, migration guide
 
 ### Frontend
-- **Framework:** Next.js 15 (App Router)
-- **React:** 19
-- **TypeScript:** Plně typované
-- **Styling:** Tailwind CSS
-- **HTTP Client:** Axios
-- **Markdown:** React-markdown
-- **State:** Context API + React hooks
+- Framework: Next.js 15 (App Router)
+- React: 19
+- TypeScript: Plně typované
+- Styling: Tailwind CSS
+- HTTP Client: Axios
+- Markdown: React-markdown
+- State: Context API + React hooks
 
-## 🎮 Gamifikace
+## Gamifikace
 
 ### Bodový systém
-- Dokončená lekce: **10 bodů**
-- Kvíz: **1-10 bodů** (podle výsledku)
-- **Daily Streak Bonus**: **2-20 bodů** (podle délky série)
-- Každých **100 bodů** = **nová úroveň**
+- Dokončená lekce: 10 bodů
+- Kvíz: 1-10 bodů (podle výsledku)
+- Daily Streak Bonus: 2-20 bodů (podle délky série)
+- Každých 100 bodů = nová úroveň
 
-### 🏆 Odznaky (7 typů)
-- 🌟 **Perfect Score** - 100% v kvízu
-- 📚 **Beginner** - 3 dokončené lekce
-- 📖 **Bookworm** - 20 dokončených lekcí
-- 🔥 **Week Warrior** - 7 dní učení v řadě
-- 🏆 **Quiz Master** - 10 perfektních kvízů
-- ⭐ **Perfectionist** - 5 perfektních kvízů v řadě
-- 🎓 **All Topics** - Lekce ze všech kategorií
+### Odznaky (7 typů)
+- Perfect Score - 100% v kvízu
+- Beginner - 3 dokončené lekce
+- Bookworm - 20 dokončených lekcí
+- Week Warrior - 7 dní v řadě
+- Quiz Master - 10 perfektních kvízů
+- Perfectionist - 5 perfektních kvízů v řadě
+- All Topics - Lekce ze všech kategorií
 
-### 📊 Statistiky
-- **Current Streak** - Aktuální denní série
-- **Longest Streak** - Nejdelší zaznamenaná série
-- **Perfect Quiz Streak** - Série perfektních kvízů za sebou
-- **Total Points** - Celkový počet bodů
-- **Level Progress** - Pokrok do dalšího levelu
+### Statistiky
+- Current Streak - Aktuální denní série
+- Longest Streak - Nejdelší zaznamenaná série
+- Perfect Quiz Streak - Série perfektních kvízů za sebou
+- Total Points - Celkový počet bodů
+- Level Progress - Pokrok do dalšího levelu
 
-## 🧪 Testování
+## Testování
 
 ```bash
 # Spustit všechny testy
@@ -224,12 +224,12 @@ npm test -- __tests__/unit/
 npm test -- __tests__/integration/
 ```
 
-**Test Coverage:**
+Test Coverage:
 - Unit tests: 41/41 (errorHandler, userModel, refreshTokenModel)
 - Integration tests: 33/33 (auth API, quiz API)
-- **Total: 74/74 tests passing ✅**
+- Total: 74/74 tests passing
 
-## 📊 Databáze (SQLite)
+## Databáze (SQLite)
 
 ### Schéma
 - `users` - Uživatelské účty (email, password_hash, name)
@@ -242,26 +242,26 @@ npm test -- __tests__/integration/
 - `quiz_results` - Výsledky kvízů
 - `user_stats` - Body, úrovně, odznaky
 
-**Připraveno pro migraci na MSSQL/PostgreSQL**
+Připraveno pro migraci na MSSQL/PostgreSQL
 
-## 🔐 Bezpečnost
+## Bezpečnost
 
-- ✅ JWT access tokens (15min expiry)
-- ✅ Refresh tokens (7 days, revokable)
-- ✅ Bcrypt password hashing (10 rounds)
-- ✅ **Helmet** - Security HTTP headers (XSS, clickjacking protection)
-- ✅ **Input sanitization** - XSS-clean & NoSQL injection protection
-- ✅ Rate limiting (anti brute-force)
-- ✅ Input validation (express-validator)
-- ✅ **Strong password policy** - Min 8 chars, uppercase, lowercase, numbers, special chars
-- ✅ **Sensitive data protection** - Passwords never returned in error responses
-- ✅ CORS configured
-- ✅ Error handling middleware
-- ✅ SQL injection prevention (prepared statements)
-- ✅ **Automatic token cleanup** - Expired refresh tokens removed periodically
-- ⚠️ **TODO**: Migrate to HttpOnly cookies (currently localStorage - XSS risk)
+- JWT access tokens (15min expiry)
+- Refresh tokens (7 days, revokable)
+- Bcrypt password hashing (10 rounds)
+- Helmet - Security HTTP headers (XSS, clickjacking protection)
+- Input sanitization - XSS-clean & NoSQL injection protection
+- Rate limiting (anti brute-force)
+- Input validation (express-validator)
+- Strong password policy - Min 8 chars, uppercase, lowercase, numbers, special chars
+- Sensitive data protection - Passwords never returned in error responses
+- CORS configured
+- Error handling middleware
+- SQL injection prevention (prepared statements)
+- Automatic token cleanup - Expired refresh tokens removed periodically
+- TODO: Migrate to HttpOnly cookies (currently localStorage - XSS risk)
 
-## 📚 Dokumentace
+## Dokumentace
 
 - [Quick Start Guide](./QUICK_START.md)
 - [Backend API Tests](./backend/API_TESTS.md)
@@ -270,7 +270,7 @@ npm test -- __tests__/integration/
 - [TypeScript Migration](./backend/TYPESCRIPT_MIGRATION.md)
 - [MVP Complete](./MVP_COMPLETE.md)
 
-## 🛠️ Development
+## Development
 
 ### Užitečné příkazy
 
@@ -296,9 +296,9 @@ npm run lint         # ESLint check
 - Winston structured logging
 - Database helpers (no code duplication)
 
-## 🔮 Roadmap
+## Roadmap
 
-### ✅ Fáze 1: MVP (HOTOVO)
+### Fáze 1: MVP (HOTOVO)
 - [x] Backend API s databází
 - [x] Frontend aplikace
 - [x] Autentizace
@@ -306,20 +306,20 @@ npm run lint         # ESLint check
 - [x] Testing (74/74)
 - [x] Security (JWT, rate limiting)
 
-### 🔄 Fáze 2: Vylepšení (Příští)
+### Fáze 2: Vylepšení (Příští)
 - [ ] Admin panel pro správu obsahu
 - [ ] Vyhledávání témat
 - [ ] Filtry (kategorie, obtížnost)
 - [ ] User dashboard s grafy
 - [ ] Social features (sdílení, komentáře)
 
-### 🎯 Fáze 3: AI & Personalizace
+### Fáze 3: AI & Personalizace
 - [ ] OpenAI/Claude integrace
 - [ ] AI generování obsahu
 - [ ] Personalizované doporučení
 - [ ] Adaptivní obtížnost
 
-### 🚀 Fáze 4: Produkce
+### Fáze 4: Produkce
 - [ ] Migrace na PostgreSQL/MSSQL
 - [ ] Docker containerizace
 - [ ] CI/CD pipeline
@@ -327,28 +327,28 @@ npm run lint         # ESLint check
 - [ ] Mobile aplikace (React Native)
 - [ ] Platební systém (Stripe)
 
-## 🎯 Cílová skupina
+## Cílová skupina
 
-- **Studenti** - Efektivní příprava na zkoušky
-- **Profesionálové** - Rozšíření znalostí v oboru
-- **Firmy** - Onboarding a školení zaměstnanců
-- **Lifelong learners** - Osobní rozvoj a zábava
+- Studenti - Efektivní příprava na zkoušky
+- Profesionálové - Rozšíření znalostí v oboru
+- Firmy - Onboarding a školení zaměstnanců
+- Lifelong learners - Osobní rozvoj a zábava
 
-## 💰 Monetizační model (plánovaný)
+## Monetizační model (plánovaný)
 
-1. **Freemium** - Základní témata zdarma
-2. **Premium** - Rozšířený obsah, AI funkce
-3. **Business** - Firemní licence, vlastní obsah
-4. **Partnership** - Spolupráce s tvůrci obsahu
+1. Freemium - Základní témata zdarma
+2. Premium - Rozšířený obsah, AI funkce
+3. Business - Firemní licence, vlastní obsah
+4. Partnership - Spolupráce s tvůrci obsahu
 
-## 📄 Licence
+## Licence
 
 Tento projekt je vytvořen pro vzdělávací účely.
 
-## 👥 Autor
+## Autor
 
 Se8o - [GitHub](https://github.com/Se8o/LearnIt)
 
 ---
 
-**LearnIt** - Učení nikdy nebylo zábavnější! 🚀📚✨
+LearnIt - Učení nikdy nebylo zábavnější!
