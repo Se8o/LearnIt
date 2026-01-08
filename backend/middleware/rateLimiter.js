@@ -3,7 +3,28 @@ const { AppError } = require('./errorHandler');
 
 // Skip rate limiting in tests and make development more permissive
 const skipRateLimiting = process.env.NODE_ENV === 'test';
-const isDevEnv = process.env.NODE_ENV !== 'production';
+const isProdEnv = process.env.NODE_ENV === 'production';
+
+// Treat localhost as safe even if NODE_ENV is set to production accidentally
+const isLocalRequest = (req) => {
+  if (!req) return false;
+  const xff = req.headers['x-forwarded-for'];
+  const forwardedIps =
+    typeof xff === 'string'
+      ? xff
+          .split(',')
+          .map((ip) => ip.trim())
+          .filter(Boolean)
+      : [];
+
+  return (
+    req.ip === '127.0.0.1' ||
+    req.ip === '::1' ||
+    req.hostname === 'localhost' ||
+    forwardedIps.includes('127.0.0.1') ||
+    forwardedIps.includes('::1')
+  );
+};
 
 /**
  * Obecný rate limiter - pro většinu endpointů
@@ -47,9 +68,9 @@ const authLimiter = rateLimit({
  */
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hodina
-  max: 3, // max 3 registrace za hodinu z jedné IP
-  // Do not block developers locally; keep active in production
-  skip: () => skipRateLimiting || isDevEnv,
+  max: isProdEnv ? 3 : 5000, // in dev allow effectively unlimited
+  // Do not block developers locally; keep strict only in real prod
+  skip: (req) => skipRateLimiting || !isProdEnv || isLocalRequest(req),
   message: 'Příliš mnoho registrací z této IP adresy',
   handler: (req, res) => {
     throw new AppError(
