@@ -96,7 +96,6 @@ const { asyncHandler, AppError } = require('../middleware/errorHandler');
  *         description: Chyba serveru
  */
 router.get('/', optionalAuth, asyncHandler((req, res) => {
-  // Pro nepřihlášené uživatele vrátit prázdný progress
   if (!req.user) {
     return res.json({
       success: true,
@@ -149,7 +148,6 @@ router.get('/', optionalAuth, asyncHandler((req, res) => {
  *         description: Chyba serveru
  */
 router.post('/complete-lesson', optionalAuth, validateCompleteLesson, asyncHandler((req, res) => {
-  // Vyžadovat přihlášení pro uložení pokroku
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -201,7 +199,6 @@ router.post('/complete-lesson', optionalAuth, validateCompleteLesson, asyncHandl
  *         description: Chyba serveru
  */
 router.post('/save-quiz-result', optionalAuth, validateSaveQuizResult, asyncHandler((req, res) => {
-  // Vyžadovat přihlášení pro uložení výsledků kvízu
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -246,7 +243,6 @@ router.post('/save-quiz-result', optionalAuth, validateSaveQuizResult, asyncHand
  *         description: Chyba serveru
  */
 router.post('/reset', optionalAuth, asyncHandler((req, res) => {
-  // Vyžadovat přihlášení pro reset pokroku
   if (!req.user) {
     throw new AppError('Pro reset pokroku se musíte přihlásit', 401);
   }

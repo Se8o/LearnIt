@@ -104,14 +104,12 @@ router.post('/register', registerLimiter, validateRegister, asyncHandler(async (
 
   const user = await createUser(email, password, name);
 
-  // Vytvořit access token (krátká expirace)
   const accessToken = jwt.sign(
     { userId: user.id, email: user.email },
     JWT_SECRET,
     { expiresIn: config.jwt.accessTokenExpiry }
   );
 
-  // Vytvořit refresh token (dlouhá expirace)
   const refreshToken = createRefreshToken(user.id);
 
   logger.info('User registered successfully', { userId: user.id, email });
@@ -179,14 +177,12 @@ router.post('/login', authLimiter, validateLogin, asyncHandler(async (req, res) 
     throw new AppError('Neplatný email nebo heslo', 401);
   }
 
-  // Vytvořit access token (krátká expirace)
   const accessToken = jwt.sign(
     { userId: user.id, email: user.email },
     JWT_SECRET,
     { expiresIn: config.jwt.accessTokenExpiry }
   );
 
-  // Vytvořit refresh token (dlouhá expirace)
   const refreshToken = createRefreshToken(user.id);
 
   logger.info('User logged in successfully', { userId: user.id, email });
@@ -326,7 +322,6 @@ router.post('/refresh', asyncHandler(async (req, res) => {
     throw new AppError('Uživatel nenalezen', 404);
   }
 
-  // Vytvoř nový access token
   const accessToken = jwt.sign(
     { userId: user.id, email: user.email },
     JWT_SECRET,

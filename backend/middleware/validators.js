@@ -2,9 +2,6 @@ const { body, param, validationResult } = require('express-validator');
 const { AppError } = require('./errorHandler');
 const { VALIDATION } = require('../config/constants');
 
-/**
- * Middleware pro zpracování výsledků validace
- */
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   
@@ -15,8 +12,6 @@ const handleValidationErrors = (req, res, next) => {
         message: err.msg
       };
       
-      // SECURITY: Nikdy nevracet plaintext hodnoty citlivých polí (hesla)
-      // Pro ostatní pole můžeme zobrazit hodnotu pro lepší UX
       if (!['password', 'passwordHash', 'token', 'refreshToken'].includes(err.path)) {
         errorObj.value = err.value;
       }
@@ -34,9 +29,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-/**
- * Validace pro registraci
- */
 const validateRegister = [
   body('email')
     .trim()
@@ -54,7 +46,6 @@ const validateRegister = [
   
   body('password')
     .custom((value) => {
-      // Dodatečná kontrola pro běžné slabé hesla (pouze pokud jsou identická)
       const lowerValue = value.toLowerCase();
       if (VALIDATION.PASSWORD.COMMON_PASSWORDS.includes(lowerValue)) {
         throw new Error('Heslo je příliš běžné a snadno uhádnutelné');
@@ -74,9 +65,6 @@ const validateRegister = [
   handleValidationErrors
 ];
 
-/**
- * Validace pro přihlášení
- */
 const validateLogin = [
   body('email')
     .trim()
@@ -91,9 +79,6 @@ const validateLogin = [
   handleValidationErrors
 ];
 
-/**
- * Validace pro aktualizaci profilu
- */
 const validateUpdateProfile = [
   body('name')
     .optional()
@@ -106,9 +91,6 @@ const validateUpdateProfile = [
   handleValidationErrors
 ];
 
-/**
- * Validace pro dokončení lekce
- */
 const validateCompleteLesson = [
   body('topicId')
     .isInt({ min: 1 })
@@ -121,9 +103,6 @@ const validateCompleteLesson = [
   handleValidationErrors
 ];
 
-/**
- * Validace pro uložení výsledku kvízu
- */
 const validateSaveQuizResult = [
   body('topicId')
     .isInt({ min: 1 })
@@ -148,9 +127,6 @@ const validateSaveQuizResult = [
   handleValidationErrors
 ];
 
-/**
- * Validace pro ID parametr v URL
- */
 const validateTopicId = [
   param('topicId')
     .isInt({ min: 1 })
@@ -159,11 +135,8 @@ const validateTopicId = [
   handleValidationErrors
 ];
 
-/**
- * Validace pro submit kvízu
- */
 const validateQuizSubmit = [
-  body('topicId') // topicId is in request body, not URL params
+  body('topicId')
     .isInt({ min: 1 })
     .withMessage('Neplatné ID tématu'),
   

@@ -1,9 +1,3 @@
-/**
- * Application constants
- * Centralized configuration for magic numbers and hardcoded values
- */
-
-// Validation constraints
 const VALIDATION = {
   PASSWORD: {
     MIN_LENGTH: 6,
@@ -19,7 +13,6 @@ const VALIDATION = {
   }
 };
 
-// Gamification settings
 const GAMIFICATION = {
   POINTS_PER_LEVEL: 100,
   PERFECT_SCORE: 100,
@@ -29,7 +22,6 @@ const GAMIFICATION = {
   }
 };
 
-// Token settings
 const TOKENS = {
   REFRESH_TOKEN_DEFAULT_EXPIRY_DAYS: 7
 };

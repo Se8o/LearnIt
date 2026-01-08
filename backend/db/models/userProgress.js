@@ -1,20 +1,11 @@
 const { getDb } = require('../setup');
 const { GAMIFICATION } = require('../../config/constants');
 
-/**
- * Get user progress
- * @param {string|number} userId - User ID (auto-converted to string for SQLite)
- * @returns {Object} Complete user progress data
- */
 const getUserProgress = (userId = 'default') => {
-  // Ensure userId is string for consistent database queries
   userId = String(userId);
   const db = getDb();
   
-  // Optimized: Single query to get all progress data
-  // Using UNION ALL to combine lessons, quizzes, and stats in one database round-trip
   const result = db.prepare(`
-    -- Get completed lessons
     SELECT 
       'lesson' as data_type,
       topic_id as topicId, 
@@ -28,7 +19,6 @@ const getUserProgress = (userId = 'default') => {
     
     UNION ALL
     
-    -- Get quiz results
     SELECT 
       'quiz' as data_type,
       topic_id as topicId,
@@ -41,7 +31,6 @@ const getUserProgress = (userId = 'default') => {
     WHERE user_id = ?
   `).all(userId, userId);
   
-  // Get user stats separately (single row, less data)
   const stats = db.prepare(`
     SELECT 
       total_points as totalPoints, 
@@ -58,7 +47,6 @@ const getUserProgress = (userId = 'default') => {
     longestStreak: 0, lastActivityDate: null, perfectQuizStreak: 0 
   };
   
-  // Separate the combined results
   const completedLessons = result
     .filter(r => r.data_type === 'lesson')
     .map(r => ({
@@ -96,7 +84,6 @@ const updateStreak = (userId) => {
   userId = String(userId);
   const db = getDb();
   
-  // Optimized: Single query to get all needed stats
   const stats = db.prepare(`
     SELECT last_activity_date, current_streak, longest_streak 
     FROM user_stats 
@@ -117,7 +104,7 @@ const updateStreak = (userId) => {
       
       if (diffDays === 1) {
         newStreak += 1;
-        bonusPoints = Math.min(newStreak * 2, 20); // Max 20 bonus points
+        bonusPoints = Math.min(newStreak * 2, 20);
       } else if (diffDays > 1) {
         newStreak = 1;
       }
@@ -127,7 +114,6 @@ const updateStreak = (userId) => {
     
     const newLongestStreak = Math.max(newStreak, stats.longest_streak);
     
-    // Atomic update of all streak-related fields
     db.prepare(`
       UPDATE user_stats 
       SET current_streak = ?, 
@@ -141,18 +127,10 @@ const updateStreak = (userId) => {
   }
 };
 
-/**
- * Complete a lesson
- * @param {string|number} userId - User ID (auto-converted to string for SQLite)
- * @param {number} topicId - Topic ID
- * @param {number} lessonId - Lesson ID
- * @returns {Object} Updated user progress
- */
 const completeLesson = (userId = 'default', topicId, lessonId) => {
   userId = String(userId);
   const db = getDb();
   
-  // Check if lesson already completed
   const existing = db.prepare(`
     SELECT id FROM user_progress 
     WHERE user_id = ? AND topic_id = ? AND lesson_id = ? AND type = 'lesson'
@@ -162,22 +140,18 @@ const completeLesson = (userId = 'default', topicId, lessonId) => {
     return getUserProgress(userId);
   }
   
-  // Use transaction for atomic operations
   const transaction = db.transaction(() => {
-    // Insert lesson completion
     db.prepare(`
       INSERT INTO user_progress (user_id, topic_id, lesson_id, completed_at, type)
       VALUES (?, ?, ?, ?, 'lesson')
     `).run(userId, topicId, lessonId, new Date().toISOString());
     
-    // Update points
     db.prepare(`
       UPDATE user_stats 
       SET total_points = total_points + 10
       WHERE user_id = ?
     `).run(userId);
     
-    // Update streak and level/badges
     updateStreak(userId);
     updateLevel(userId);
   });
@@ -187,14 +161,6 @@ const completeLesson = (userId = 'default', topicId, lessonId) => {
   return getUserProgress(userId);
 };
 
-/**
- * Save quiz result
- * @param {string|number} userId - User ID (auto-converted to string for SQLite)
- * @param {number} topicId - Topic ID
- * @param {Object} score - Score object with correct and total
- * @param {number} percentage - Quiz percentage score
- * @returns {Object} Progress and points earned
- */
 const saveQuizResult = (userId = 'default', topicId, score, percentage) => {
   userId = String(userId);
   const db = getDb();
@@ -202,15 +168,12 @@ const saveQuizResult = (userId = 'default', topicId, score, percentage) => {
   const points = Math.round(percentage / 10);
   const isPerfect = percentage === GAMIFICATION.PERFECT_SCORE;
   
-  // Use transaction for atomic operations
   const transaction = db.transaction(() => {
-    // Insert quiz result
     db.prepare(`
       INSERT INTO quiz_results (user_id, topic_id, correct_answers, total_questions, percentage, completed_at)
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(userId, topicId, score.correct, score.total, percentage, new Date().toISOString());
     
-    // Update points and perfect quiz streak in single query
     if (isPerfect) {
       db.prepare(`
         UPDATE user_stats 
@@ -227,7 +190,6 @@ const saveQuizResult = (userId = 'default', topicId, score, percentage) => {
       `).run(points, userId);
     }
     
-    // Update streak, level, and badges
     updateStreak(userId);
     updateLevel(userId);
     updateBadges(userId, percentage);
@@ -245,7 +207,6 @@ const updateLevel = (userId) => {
   userId = String(userId);
   const db = getDb();
   
-  // Optimized: Calculate and update level in single operation
   const stats = db.prepare(`
     SELECT total_points 
     FROM user_stats 
@@ -265,7 +226,6 @@ const updateBadges = (userId, percentage = null) => {
   userId = String(userId);
   const db = getDb();
   
-  // Optimized: Get all needed data in fewer queries
   const stats = db.prepare(`
     SELECT badges, current_streak, perfect_quiz_streak 
     FROM user_stats 
@@ -275,13 +235,11 @@ const updateBadges = (userId, percentage = null) => {
   const badges = JSON.parse(stats.badges);
   let newBadges = false;
   
-  // Perfect Score - 100% v kvízu
   if (percentage === GAMIFICATION.PERFECT_SCORE && !badges.includes('perfect-score')) {
     badges.push('perfect-score');
     newBadges = true;
   }
   
-  // Optimized: Get lesson count and categories in single query with JOIN
   const lessonStats = db.prepare(`
     SELECT 
       COUNT(*) as lesson_count,
@@ -294,25 +252,21 @@ const updateBadges = (userId, percentage = null) => {
   
   const lessonCount = lessonStats.lesson_count;
   
-  // Beginner - 3 dokončené lekce
   if (lessonCount >= 3 && !badges.includes('beginner')) {
     badges.push('beginner');
     newBadges = true;
   }
   
-  // Bookworm - 20 dokončených lekcí
   if (lessonCount >= 20 && !badges.includes('bookworm')) {
     badges.push('bookworm');
     newBadges = true;
   }
   
-  // Week Warrior - 7 dní v řadě
   if (stats.current_streak >= GAMIFICATION.STREAK.WEEK_WARRIOR_DAYS && !badges.includes('week-warrior')) {
     badges.push('week-warrior');
     newBadges = true;
   }
   
-  // Quiz Master - 10 perfektních kvízů (celkem)
   const perfectQuizCount = db.prepare(`
     SELECT COUNT(*) as count 
     FROM quiz_results 
@@ -324,13 +278,11 @@ const updateBadges = (userId, percentage = null) => {
     newBadges = true;
   }
   
-  // Perfectionist - 5 perfektních kvízů v řadě
   if (stats.perfect_quiz_streak >= 5 && !badges.includes('perfectionist')) {
     badges.push('perfectionist');
     newBadges = true;
   }
   
-  // All Topics - Alespoň 1 lekce z každé kategorie
   if (lessonStats.category_count >= lessonStats.total_categories && 
       lessonStats.total_categories > 0 && 
       !badges.includes('all-topics')) {
@@ -347,16 +299,10 @@ const updateBadges = (userId, percentage = null) => {
   }
 };
 
-/**
- * Reset user progress
- * @param {string|number} userId - User ID (auto-converted to string for SQLite)
- * @returns {Object} Reset user progress
- */
 const resetProgress = (userId = 'default') => {
   userId = String(userId);
   const db = getDb();
   
-  // Use transaction for atomic reset operation
   const transaction = db.transaction(() => {
     db.prepare('DELETE FROM user_progress WHERE user_id = ?').run(userId);
     db.prepare('DELETE FROM quiz_results WHERE user_id = ?').run(userId);

@@ -1,21 +1,17 @@
 const rateLimit = require('express-rate-limit');
 const { AppError } = require('./errorHandler');
 
-// Skip rate limiting in tests and make development more permissive
 const skipRateLimiting = process.env.NODE_ENV === 'test';
 const isProdEnv = process.env.NODE_ENV === 'production';
 const disableRegisterLimiter =
   !isProdEnv || process.env.DISABLE_REGISTER_RATE_LIMIT === 'true';
 
-/**
- * Obecný rate limiter - pro většinu endpointů
- */
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minut
-  max: 100, // limit 100 requestů per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Příliš mnoho požadavků z této IP adresy, zkuste to prosím později',
-  standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
-  legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
   skip: () => skipRateLimiting,
   handler: (req, res) => {
     throw new AppError(
@@ -25,14 +21,10 @@ const generalLimiter = rateLimit({
   }
 });
 
-/**
- * Přísný rate limiter pro autentizační endpointy
- * Chrání proti brute-force útokům na přihlášení
- */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minut
-  max: 5, // limit 5 pokusů o přihlášení
-  skipSuccessfulRequests: true, // Nepočítat úspěšné pokusy
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  skipSuccessfulRequests: true,
   skip: () => skipRateLimiting,
   message: 'Příliš mnoho pokusů o přihlášení, zkuste to za 15 minut',
   handler: (req, res) => {
@@ -43,14 +35,9 @@ const authLimiter = rateLimit({
   }
 });
 
-/**
- * Rate limiter pro registraci
- * Omezuje spam registrace
- */
 const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hodina
-  max: disableRegisterLimiter ? 5000 : 3, // in dev allow effectively unlimited
-  // Skip entirely for anything except real production unless explicitly forced on
+  windowMs: 60 * 60 * 1000,
+  max: disableRegisterLimiter ? 5000 : 3,
   skip: () => skipRateLimiting || disableRegisterLimiter,
   message: 'Příliš mnoho registrací z této IP adresy',
   handler: (req, res) => {
@@ -61,13 +48,9 @@ const registerLimiter = rateLimit({
   }
 });
 
-/**
- * Rate limiter pro kvízy
- * Omezuje možnost submitovat příliš rychle
- */
 const quizLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minuta
-  max: 10, // max 10 submitů za minutu
+  windowMs: 60 * 1000,
+  max: 10,
   skip: () => skipRateLimiting,
   message: 'Příliš mnoho odeslaných kvízů',
   handler: (req, res) => {
@@ -78,12 +61,9 @@ const quizLimiter = rateLimit({
   }
 });
 
-/**
- * Strict limiter pro sensitive operace
- */
 const strictLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minut
-  max: 3, // max 3 pokusy
+  windowMs: 15 * 60 * 1000,
+  max: 3,
   skip: () => skipRateLimiting,
   message: 'Příliš mnoho pokusů, zkuste to později',
   handler: (req, res) => {

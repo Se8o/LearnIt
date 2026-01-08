@@ -2,13 +2,11 @@ const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
 
-// Ujistit se, že logs složka existuje
 const logsDir = path.join(__dirname, '../logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Definice custom log levelů
 const customLevels = {
   levels: {
     error: 0,
@@ -26,10 +24,8 @@ const customLevels = {
   }
 };
 
-// Přidat barvy do winston
 winston.addColors(customLevels.colors);
 
-// Format pro konzoli (barevný, čitelný)
 const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.colorize({ all: true }),
@@ -38,7 +34,6 @@ const consoleFormat = winston.format.combine(
   )
 );
 
-// Format pro soubory (JSON pro snadné parsování)
 const fileFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
@@ -46,7 +41,6 @@ const fileFormat = winston.format.combine(
   winston.format.json()
 );
 
-// Vytvoření loggeru
 const logger = winston.createLogger({
   levels: customLevels.levels,
   level: process.env.LOG_LEVEL || 'info',
@@ -56,34 +50,27 @@ const logger = winston.createLogger({
     environment: process.env.NODE_ENV || 'development'
   },
   transports: [
-    // Error log - pouze chyby
     new winston.transports.File({
       filename: path.join(__dirname, '../logs/error.log'),
       level: 'error',
-      maxsize: 5242880, // 5MB
+      maxsize: 5242880,
       maxFiles: 5,
     }),
-    
-    // Combined log - všechno
     new winston.transports.File({
       filename: path.join(__dirname, '../logs/combined.log'),
-      maxsize: 5242880, // 5MB
+      maxsize: 5242880,
       maxFiles: 5,
     }),
   ],
-  
-  // Neukončovat process při neošetřené výjimce
   exitOnError: false,
 });
 
-// V development módu loguj i do konzole
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: consoleFormat,
   }));
 }
 
-// Zachytávání neošetřených výjimek a rejection
 logger.exceptions.handle(
   new winston.transports.File({ 
     filename: path.join(__dirname, '../logs/exceptions.log'),
@@ -100,9 +87,6 @@ logger.rejections.handle(
   })
 );
 
-/**
- * HTTP request logging middleware
- */
 const httpLogger = (req, res, next) => {
   const start = Date.now();
   
@@ -127,9 +111,6 @@ const httpLogger = (req, res, next) => {
   next();
 };
 
-/**
- * Helper funkce pro logování s kontextem
- */
 const logWithContext = (level, message, context = {}) => {
   logger.log(level, message, context);
 };

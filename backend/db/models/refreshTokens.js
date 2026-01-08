@@ -4,34 +4,26 @@ const { config } = require('../../config/env');
 const { mapDbRow } = require('../../utils/db-helpers');
 
 /**
- * Vytvoření refresh tokenu pro uživatele
- * @param {number} userId - User ID
- * @returns {string} Generated refresh token
+ * Create a refresh token for the given user
  */
 const createRefreshToken = (userId) => {
   const db = getDb();
-  
-  // Generovat náhodný token
+
   const token = crypto.randomBytes(40).toString('hex');
-  
-  // Vypočítat expiraci
+
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + config.jwt.refreshTokenExpiryDays);
-  
-  // Uložit do databáze
+
   const stmt = db.prepare(`
     INSERT INTO refresh_tokens (user_id, token, expires_at)
     VALUES (?, ?, ?)
   `);
-  
+
   stmt.run(userId, token, expiresAt.toISOString());
-  
+
   return token;
 };
 
-/**
- * Najít refresh token
- */
 const findRefreshToken = (token) => {
   const db = getDb();
   return db.prepare(`
@@ -40,9 +32,6 @@ const findRefreshToken = (token) => {
   `).get(token);
 };
 
-/**
- * Ověřit platnost refresh tokenu
- */
 const verifyRefreshToken = (token) => {
   const refreshToken = findRefreshToken(token);
   
@@ -63,9 +52,6 @@ const verifyRefreshToken = (token) => {
   };
 };
 
-/**
- * Revokovat refresh token (odhlášení)
- */
 const revokeRefreshToken = (token) => {
   const db = getDb();
   const stmt = db.prepare(`
@@ -77,9 +63,6 @@ const revokeRefreshToken = (token) => {
   return stmt.run(token);
 };
 
-/**
- * Revokovat všechny refresh tokeny uživatele
- */
 const revokeAllUserTokens = (userId) => {
   const db = getDb();
   const stmt = db.prepare(`
@@ -91,9 +74,6 @@ const revokeAllUserTokens = (userId) => {
   return stmt.run(userId);
 };
 
-/**
- * Smazat expirované tokeny (cleanup)
- */
 const deleteExpiredTokens = () => {
   const db = getDb();
   const now = new Date().toISOString();
@@ -106,9 +86,6 @@ const deleteExpiredTokens = () => {
   return stmt.run(now);
 };
 
-/**
- * Získat všechny aktivní tokeny uživatele
- */
 const getUserActiveTokens = (userId) => {
   const db = getDb();
   const now = new Date().toISOString();

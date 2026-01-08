@@ -1,27 +1,19 @@
-/**
- * Custom Error class for application errors
- */
 class AppError extends Error {
   constructor(message, statusCode = 500, errors = null) {
     super(message);
     this.statusCode = statusCode;
     this.errors = errors;
-    this.isOperational = true; // Odlišuje operační chyby od programátorských chyb
+    this.isOperational = true;
     
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-/**
- * Centralizovaný error handler middleware
- * Musí být poslední middleware v řetězci
- */
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
   error.statusCode = err.statusCode || 500;
 
-  // Log error pro debugging (v produkci by šlo do loggeru jako Winston)
   if (process.env.NODE_ENV === 'development') {
     console.error('Error:', {
       message: error.message,
@@ -30,7 +22,6 @@ const errorHandler = (err, req, res, next) => {
       errors: error.errors
     });
   } else {
-    // V produkci logovat jen kritické info (později přidat Winston)
     console.error('Error:', {
       message: error.message,
       statusCode: error.statusCode,
@@ -39,13 +30,11 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // SQLite constraint error (např. unique email)
   if (err.message && err.message.includes('UNIQUE constraint failed')) {
     error.message = 'Tento email je již zaregistrován';
     error.statusCode = 409;
   }
 
-  // JWT errors
   if (err.name === 'JsonWebTokenError') {
     error.message = 'Neplatný autentizační token';
     error.statusCode = 401;
@@ -56,20 +45,17 @@ const errorHandler = (err, req, res, next) => {
     error.statusCode = 401;
   }
 
-  // Validation errors (později pro express-validator)
   if (err.name === 'ValidationError') {
     error.message = 'Neplatná data';
     error.statusCode = 400;
   }
 
-  // Response struktura
   const response = {
     success: false,
     error: error.message || 'Něco se pokazilo',
     statusCode: error.statusCode
   };
 
-  // Přidat detaily v development nebo test mode
   if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     if (err.stack) {
       response.stack = err.stack;

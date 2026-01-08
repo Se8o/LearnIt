@@ -11,14 +11,11 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const { deleteExpiredTokens } = require('./db/models/refreshTokens');
 
-// Load environment variables FIRST
 dotenv.config();
 
-// Import config after dotenv
 const { validateEnv, config } = require('./config/env');
 const { logger, httpLogger } = require('./config/logger');
 
-// Validate environment variables
 try {
   validateEnv();
 } catch (error) {
@@ -28,11 +25,9 @@ try {
 
 seedDatabase();
 
-// Cleanup expired refresh tokens on startup
 deleteExpiredTokens();
 logger.info('Expired refresh tokens cleaned up');
 
-// Setup periodic cleanup (every 24 hours)
 setInterval(() => {
   const result = deleteExpiredTokens();
   logger.info('Periodic cleanup of expired tokens', { deleted: result.changes });
@@ -40,10 +35,8 @@ setInterval(() => {
 
 const app = express();
 
-// Security middleware - správné pořadí je kritické!
-app.set('trust proxy', 1); // Pro správné IP adresy za reverse proxy
+app.set('trust proxy', 1);
 
-// 1. Helmet - Security HTTP headers (XSS, clickjacking, etc.)
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -53,27 +46,22 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
-  crossOriginEmbedderPolicy: false, // Pro Swagger UI
+  crossOriginEmbedderPolicy: false,
 }));
 
-// 2. CORS konfigurace
 app.use(cors({
   origin: config.cors.origin,
   credentials: true
 }));
 
-// 3. Rate limiting - před parsing pro ochranu před DoS
 app.use('/api', generalLimiter);
 
-// 4. Body parsing - po rate limitingu
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 5. Data sanitization proti NoSQL injection a XSS
-app.use(mongoSanitize()); // Odstraní $ a . z user input
-app.use(xss()); // Sanitizuje user input proti XSS
+app.use(mongoSanitize());
+app.use(xss());
 
-// HTTP request logging
 app.use(httpLogger);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -130,10 +118,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 handler - musí být před error handlerem
 app.use(notFound);
 
-// Globální error handler - musí být poslední middleware
 app.use(errorHandler);
 
 app.listen(config.port, () => {
